@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import LocalChart from "./LocalChart";
+import { parsePineScript } from "./pineScriptParser";
 
 // 4개의 차트 컨테이너 ID
 const CHART_IDS = [
@@ -36,7 +38,23 @@ function TradingViewAIDashboard() {
   const [pineScripts, setPineScripts] = useState(
     CHART_IDS.map(
       () =>
-        `// Pine Script 예시\n//@version=5\nindicator("Chart pipeline example", overlay=true)\nplot(close)`
+        `//@version=5
+indicator("ETH SuperTrend Signals", overlay=true)
+
+len = input.int(10), factor = input.float(3.0, step=0.1)
+
+[st, dir] = ta.supertrend(factor, len)
+
+long  = dir ==  1 and dir[1] !=  1
+short = dir == -1 and dir[1] != -1
+
+plot(st, "SuperTrend", color = dir==1? color.green: color.red)
+plotshape(long,  style=shape.triangleup,   location=location.belowbar, color=color.green, text="BUY")
+plotshape(short, style=shape.triangledown, location=location.abovebar, color=color.red,   text="SELL")
+
+// 알림(웹훅 JSON, 자리표시자 사용 가능)
+alertcondition(long,  "BUY",  '{"side":"buy","symbol":"{{ticker}}","price":{{close}},"time":"{{time}}"}')
+alertcondition(short, "SELL", '{"side":"sell","symbol":"{{ticker}}","price":{{close}},"time":"{{time}}"}')`
     )
   );
 
@@ -45,41 +63,73 @@ function TradingViewAIDashboard() {
   const [analysis, setAnalysis] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState(null);
+  
+  // 각 차트별 모드 (tradingview | local)
+  const [chartModes, setChartModes] = useState(
+    CHART_IDS.map(() => "tradingview")
+  );
+  
+  // 각 차트별 적용된 Pine Script (버튼 클릭 시 적용)
+  const [appliedPineScripts, setAppliedPineScripts] = useState(
+    CHART_IDS.map(() => "")
+  );
+
+  // 위젯 인스턴스 저장용 ref
+  const widgetRefs = useRef([]);
 
   // TradingView 위젯 로딩 (각 차트별 설정 사용) - 디버그 및 재시도 로직 포함
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    // TradingView 모드인 차트만 처리
+    const tradingViewIndices = chartModes
+      .map((mode, idx) => mode === "tradingview" ? idx : -1)
+      .filter(idx => idx !== -1);
+    
+    if (tradingViewIndices.length === 0) return;
+
     const scriptId = "tradingview-widget-script";
+    let resizeTimer = null;
+    let scriptAppended = false;
 
     const createWidgets = (attempt = 1) => {
-      console.log(`[TV DEBUG] createWidgets 호출 (attempt ${attempt}), window.TradingView:`, !!window.TradingView);
+      console.log(
+        `[TV DEBUG] createWidgets 호출 (attempt ${attempt}), window.TradingView:`,
+        !!window.TradingView
+      );
       if (typeof window.TradingView === "undefined") {
         setError("TradingView 스크립트가 로드되지 않았습니다.");
         return;
       }
       setError(null);
 
-      CHART_IDS.forEach((id, idx) => {
+      tradingViewIndices.forEach((idx) => {
+        const id = CHART_IDS[idx];
         const container = document.getElementById(id);
-        console.log(`[TV DEBUG] container ${id}:`, !!container, "config:", chartConfigs[idx]);
+        console.log(
+          `[TV DEBUG] container ${id}:`,
+          !!container,
+          "config:",
+          chartConfigs[idx]
+        );
         if (!container) {
-          // UI에 보이도록 오류 상태 설정
-          setError((prev) => (prev ? prev + `\n컨테이너 ${id} 없음` : `컨테이너 ${id} 없음`));
+          setError((prev) =>
+            prev ? prev + `\n컨테이너 ${id} 없음` : `컨테이너 ${id} 없음`
+          );
           return;
         }
 
         try {
-          // 기존 내용 초기화
           container.innerHTML = "";
 
-          // 컨테이너 실제 픽셀 높이를 읽어서 숫자로 전달
           const heightPx = Math.max(200, container.clientHeight);
 
           const cfg = chartConfigs[idx] || {};
-          console.log(`[TV DEBUG] 위젯 생성 시작: id=${id}, symbol=${cfg.symbol}, interval=${cfg.timeframe}, height=${heightPx}`);
+          console.log(
+            `[TV DEBUG] 위젯 생성 시작: id=${id}, symbol=${cfg.symbol}, interval=${cfg.timeframe}, height=${heightPx}`
+          );
 
-          new window.TradingView.widget({
+          const widget = new window.TradingView.widget({
             symbol: cfg.symbol || DEFAULT_SYMBOLS[0],
             interval: cfg.timeframe || "60",
             timezone: "Asia/Seoul",
@@ -97,14 +147,63 @@ function TradingViewAIDashboard() {
             overrides: {},
           });
 
-          // 생성 직후 DOM 확인 (widget이 내부에 삽입되었는지)
+          // 인스턴스 저장 (정리용)
+          try {
+            widgetRefs.current[idx] = widget;
+          } catch (_) {}
+
           setTimeout(() => {
             try {
-              console.log(`[TV DEBUG] ${id} innerHTML length:`, container.innerHTML.length);
-              // 내부에 iframe/div 등 요소가 없으면 재시도
+              console.log(
+                `[TV DEBUG] ${id} innerHTML length:`,
+                container.innerHTML.length
+              );
+              const children = Array.from(container.children).map((c) => ({
+                tag: c.tagName,
+                id: c.id || null,
+                class: c.className || null,
+                htmlLength: c.innerHTML ? c.innerHTML.length : 0,
+              }));
+              console.log(`[TV DEBUG] ${id} children:`, children);
+
+              const iframes = Array.from(
+                container.querySelectorAll("iframe")
+              ).map((f) => {
+                const cs = window.getComputedStyle(f);
+                try {
+                  f.style.display = "block";
+                  f.style.visibility = "visible";
+                  f.style.opacity = "1";
+                  f.style.zIndex = "9999";
+                  f.style.width = "100%";
+                  f.style.height = "100%";
+                  f.style.pointerEvents = "auto";
+                } catch (_) {}
+                return {
+                  src: f.src,
+                  width: f.width || f.clientWidth,
+                  height: f.height || f.clientHeight,
+                  display: cs.display,
+                  visibility: cs.visibility,
+                  opacity: cs.opacity,
+                };
+              });
+              console.log(`[TV DEBUG] ${id} iframes:`, iframes);
+
               if (container.innerHTML.trim().length === 0 && attempt < 4) {
-                console.warn(`[TV DEBUG] ${id}에 위젯 내용 없음 — 재시도 ${attempt + 1}`);
+                console.warn(
+                  `[TV DEBUG] ${id}에 위젯 내용 없음 — 재시도 ${attempt + 1}`
+                );
                 setTimeout(() => createWidgets(attempt + 1), 1000);
+              }
+
+              if (iframes.length > 0) {
+                const zeroSize = iframes.some(
+                  (f) => f.width === 0 || f.height === 0
+                );
+                if (zeroSize) {
+                  console.warn(`[TV DEBUG] ${id} iframe 중 0 크기 발견`);
+                }
               }
             } catch (e) {
               console.error("[TV DEBUG] innerHTML 체크 오류:", e);
@@ -112,13 +211,13 @@ function TradingViewAIDashboard() {
           }, 600);
         } catch (e) {
           console.error("[TV DEBUG] widget 생성 오류:", e);
-          setError((prev) => (prev ? prev + `\nwidget 생성 오류: ${e.message}` : `widget 생성 오류: ${e.message}`));
+          setError((prev) =>
+            prev ? prev + `\nwidget 생성 오류: ${e.message}` : `widget 생성 오류: ${e.message}`
+          );
         }
       });
     };
 
-    // 리사이즈시 위젯 재생성 (디바운스)
-    let resizeTimer = null;
     const onResize = () => {
       if (resizeTimer) clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
@@ -126,7 +225,6 @@ function TradingViewAIDashboard() {
       }, 200);
     };
 
-    // tv.js가 없다면 스크립트 추가 (onerror 추가)
     if (!document.getElementById(scriptId)) {
       console.log("[TV DEBUG] tv.js 스크립트 추가 시도");
       const script = document.createElement("script");
@@ -136,7 +234,6 @@ function TradingViewAIDashboard() {
       script.async = true;
       script.onload = () => {
         console.log("[TV DEBUG] tv.js 로드 완료");
-        // DOM이 완전히 렌더링되도록 짧게 지연 후 생성 시도
         setTimeout(() => createWidgets(1), 300);
       };
       script.onerror = (err) => {
@@ -144,6 +241,7 @@ function TradingViewAIDashboard() {
         setError("TradingView 스크립트 로드 실패 (네트워크/CSP 확인)");
       };
       document.body.appendChild(script);
+      scriptAppended = true;
     } else {
       console.log("[TV DEBUG] tv.js 이미 존재, createWidgets 호출 (지연 100ms)");
       setTimeout(() => createWidgets(1), 100);
@@ -154,11 +252,29 @@ function TradingViewAIDashboard() {
     return () => {
       window.removeEventListener("resize", onResize);
       if (resizeTimer) clearTimeout(resizeTimer);
-    };
-    // chartConfigs 변경 시 각 위젯 재생성
-  }, [chartConfigs]);
 
-  // (예시) AI 분석 – 선택된 차트의 설정 사용
+      // 위젯 정리
+      widgetRefs.current.forEach((w, i) => {
+        try {
+          if (w && typeof w.remove === "function") {
+            w.remove();
+          } else {
+            const el = document.getElementById(CHART_IDS[i]);
+            if (el) el.innerHTML = "";
+          }
+        } catch (_) {}
+      });
+      widgetRefs.current = [];
+
+      // 스크립트 제거 (이 컴포넌트가 추가한 경우에만)
+      if (scriptAppended) {
+        const s = document.getElementById(scriptId);
+        if (s && s.parentNode) s.parentNode.removeChild(s);
+      }
+    };
+    // chartConfigs, chartModes 변경 시 각 위젯 재생성
+  }, [chartConfigs, chartModes]);
+
   const runMockAnalysis = (cfg) => {
     const now = new Date();
     const r = Math.random();
@@ -281,7 +397,6 @@ function TradingViewAIDashboard() {
     );
   };
 
-  // Pine script 파일 다운로드 (차트 인덱스 지정 가능)
   const handleDownloadPine = (idx = selectedChartIdx) => {
     const content = pineScripts[idx] || "";
     const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
@@ -303,7 +418,6 @@ function TradingViewAIDashboard() {
     window.open(url, "_blank");
   };
 
-  // 선택 차트의 Pine 스크립트를 클립보드에 복사하고 TradingView를 새 탭으로 엽니다.
   const handleCopyPineToClipboard = async (idx = selectedChartIdx) => {
     try {
       const text = pineScripts[idx] || "";
@@ -327,11 +441,88 @@ function TradingViewAIDashboard() {
     });
   };
 
+  const handleApplyPineScript = () => {
+    if (chartModes[selectedChartIdx] === "local") {
+      // 로컬 차트 모드: Pine Script 적용
+      const script = pineScripts[selectedChartIdx] || "";
+      const indicators = parsePineScript(script);
+      
+      if (indicators.length > 0) {
+        setAppliedPineScripts((prev) => {
+          const next = [...prev];
+          next[selectedChartIdx] = script;
+          return next;
+        });
+        alert(`✅ ${indicators.length}개의 지표가 적용되었습니다!\n\n적용된 지표:\n${indicators.map((ind, idx) => `${idx + 1}. ${ind.type}${ind.period ? `(${ind.period})` : ''}`).join('\n')}`);
+      } else {
+        alert("⚠️ 파싱 가능한 지표를 찾을 수 없습니다.\n\n지원 형식:\n- plot(close)\n- plot(sma(close, 20))\n- plot(ema(close, 12))\n- plot(rsi(close, 14))");
+      }
+    } else {
+      alert("로컬 차트 모드로 전환하면 Pine Script를 적용할 수 있습니다.\n\n현재 TradingView 모드에서는 웹 차트에서 직접 적용해야 합니다.");
+    }
+  };
+
+  const handleLoadExampleScript = () => {
+    const examples = [
+      `//@version=5
+indicator("기본 예시", overlay=true)
+plot(close)`,
+      `//@version=5
+indicator("SMA 예시", overlay=true)
+plot(close)
+plot(sma(close, 20))`,
+      `//@version=5
+indicator("EMA 예시", overlay=true)
+plot(close)
+plot(ema(close, 12))`,
+      `//@version=5
+indicator("RSI 예시", overlay=true)
+plot(close)
+plot(rsi(close, 14))`,
+      `//@version=5
+indicator("복합 지표", overlay=true)
+plot(close)
+plot(sma(close, 20))
+plot(ema(close, 12))`,
+    ];
+    const randomExample = examples[Math.floor(Math.random() * examples.length)];
+    setPineScripts((prev) => {
+      const next = [...prev];
+      next[selectedChartIdx] = randomExample;
+      return next;
+    });
+  };
+
+  const handleLoadSuperTrendScript = () => {
+    const superTrendScript = `//@version=5
+indicator("ETH SuperTrend Signals", overlay=true)
+
+len = input.int(10), factor = input.float(3.0, step=0.1)
+
+[st, dir] = ta.supertrend(factor, len)
+
+long  = dir ==  1 and dir[1] !=  1
+short = dir == -1 and dir[1] != -1
+
+plot(st, "SuperTrend", color = dir==1? color.green: color.red)
+plotshape(long,  style=shape.triangleup,   location=location.belowbar, color=color.green, text="BUY")
+plotshape(short, style=shape.triangledown, location=location.abovebar, color=color.red,   text="SELL")
+
+// 알림(웹훅 JSON, 자리표시자 사용 가능)
+alertcondition(long,  "BUY",  '{"side":"buy","symbol":"{{ticker}}","price":{{close}},"time":"{{time}}"}')
+alertcondition(short, "SELL", '{"side":"sell","symbol":"{{ticker}}","price":{{close}},"time":"{{time}}"}')`;
+    
+    setPineScripts((prev) => {
+      const next = [...prev];
+      next[selectedChartIdx] = superTrendScript;
+      return next;
+    });
+  };
+
   const copyPineToAll = () => {
     setPineScripts((prev) => prev.map(() => prev[selectedChartIdx] || ""));
   };
 
-  // 2x2 그리드 스타일 및 차트 박스
   const gridStyle = {
     display: "grid",
     gridTemplateColumns: "repeat(2, 1fr)",
@@ -358,7 +549,6 @@ function TradingViewAIDashboard() {
 
   const labelStyle = { fontSize: 14, color: "#e5e7eb" };
 
-  // 선택된 차트의 설정 편집 핸들러
   const updateSelectedChartConfig = (patch) => {
     setChartConfigs((prev) => {
       const next = [...prev];
@@ -367,11 +557,57 @@ function TradingViewAIDashboard() {
     });
   };
 
+  const toggleChartMode = (idx) => {
+    setChartModes((prev) => {
+      const next = [...prev];
+      next[idx] = next[idx] === "tradingview" ? "local" : "tradingview";
+      return next;
+    });
+  };
+
   return (
     <div style={{ padding: 16, background: "#020617", minHeight: "100vh", color: "#e5e7eb" }}>
-      {/* 툴바: 선택 차트 설정 */}
+      <div style={{ marginBottom: 12 }}>
+        <textarea
+          value={pineScripts[selectedChartIdx]}
+          onChange={(e) => handleChangePine(e.target.value)}
+          placeholder={`//@version=5
+indicator("My Indicator", overlay=true)
+plot(close)
+plot(sma(close, 20))`}
+          style={{
+            width: "100%",
+            minHeight: 180,
+            maxHeight: 300,
+            padding: 12,
+            background: "#0b1220",
+            color: "#e5e7eb",
+            borderRadius: 6,
+            border: "1px solid #1f2937",
+            fontFamily: "monospace",
+            fontSize: 13,
+            resize: "vertical",
+          }}
+        />
+      </div>
+
       <div style={toolbarStyle}>
         <div style={labelStyle}>선택 차트: #{selectedChartIdx + 1}</div>
+
+        <select
+          value={chartModes[selectedChartIdx] || "tradingview"}
+          onChange={(e) => {
+            setChartModes((prev) => {
+              const next = [...prev];
+              next[selectedChartIdx] = e.target.value;
+              return next;
+            });
+          }}
+          style={{ marginRight: 8 }}
+        >
+          <option value="tradingview">TradingView</option>
+          <option value="local">로컬 차트 (Pine Script 적용)</option>
+        </select>
 
         <select
           value={chartConfigs[selectedChartIdx]?.timeframe || "60"}
@@ -408,7 +644,6 @@ function TradingViewAIDashboard() {
         </button>
       </div>
 
-      {/* Pine Editor 패널 */}
       <div style={{ marginBottom: 12, display: "flex", gap: 8, alignItems: "flex-start", flexWrap: "wrap" }}>
         <div style={{ minWidth: 220, maxWidth: 360 }}>
           <div style={{ marginBottom: 6, color: "#9ca3af", fontSize: 13 }}>
@@ -419,44 +654,71 @@ function TradingViewAIDashboard() {
             <button onClick={() => handleDownloadPine(selectedChartIdx)} style={{ padding: "6px 10px" }}>
               선택 차트 다운로드
             </button>
-            <button onClick={handleDownloadPine} style={{ padding: "6px 10px" }}>
-              전체 다운로드(선택)
-            </button>
-            <button onClick={copyPineToAll} style={{ padding: "6px 10px" }}>
-              모든 차트에 복사
-            </button>
-            <button onClick={handleOpenTradingView} style={{ padding: "6px 10px" }}>
-              TradingView에서 열기
-            </button>
-            <button onClick={() => handleCopyPineToClipboard(selectedChartIdx)} style={{ padding: "6px 10px" }}>
-              복사 후 TradingView 열기
-            </button>
           </div>
           <div style={{ marginTop: 8, color: "#9ca3af", fontSize: 12 }}>
-            참고: 임베디드 위젯에는 스크립트를 자동 적용할 수 없습니다. TradingView 웹 차트에서 Pine Editor에 붙여넣어 사용하세요.
+            {chartModes[selectedChartIdx] === "local" ? (
+              <>
+                <strong>로컬 차트 모드:</strong> Pine Script를 작성한 후 "적용" 버튼을 클릭하세요. 
+                지원 지표: plot(close), plot(sma(close, period)), plot(ema(close, period)), plot(rsi(close, period))
+              </>
+            ) : (
+              <>
+                <strong>TradingView 모드:</strong> 임베디드 위젯에는 스크립트를 자동 적용할 수 없습니다. 
+                TradingView 웹 차트에서 Pine Editor에 붙여넣어 사용하세요.
+              </>
+            )}
           </div>
         </div>
 
-        <textarea
-          value={pineScripts[selectedChartIdx]}
-          onChange={(e) => handleChangePine(e.target.value)}
-          style={{
-            flex: "1 1 auto",
-            minHeight: 140,
-            maxHeight: 500,
-            width: 720,
-            padding: 8,
-            background: "#0b1220",
-            color: "#e5e7eb",
-            borderRadius: 6,
-            border: "1px solid #1f2937",
-            fontFamily: "monospace",
-            fontSize: 13,
-          }}
-        />
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginTop: 8 }}>
+          <button 
+            onClick={handleApplyPineScript}
+            style={{ 
+              padding: "8px 16px",
+              background: chartModes[selectedChartIdx] === "local" ? "#10b981" : "#3b82f6",
+              color: "#fff",
+              border: "none",
+              borderRadius: 6,
+              cursor: "pointer",
+              fontWeight: 500,
+              fontSize: 13,
+            }}
+          >
+            {chartModes[selectedChartIdx] === "local" ? "✅ Pine Script 적용" : "📋 적용 안내"}
+          </button>
+          <button 
+            onClick={handleLoadSuperTrendScript}
+            style={{ 
+              padding: "8px 16px",
+              background: "#8b5cf6",
+              color: "#fff",
+              border: "none",
+              borderRadius: 6,
+              cursor: "pointer",
+              fontWeight: 500,
+              fontSize: 13,
+            }}
+          >
+            🚀 SuperTrend 스크립트 로드
+          </button>
+          <button 
+            onClick={handleLoadExampleScript}
+            style={{ 
+              padding: "8px 16px",
+              background: "#1f2937",
+              color: "#e5e7eb",
+              border: "1px solid #374151",
+              borderRadius: 6,
+              cursor: "pointer",
+              fontWeight: 500,
+              fontSize: 13,
+            }}
+          >
+            📝 예시 스크립트 로드
+          </button>
+        </div>
       </div>
 
-      {/* 2x2 그리드: 각 차트는 가로 1/2 */}
       <div style={gridStyle}>
         {CHART_IDS.map((id, idx) => (
           <div
@@ -465,16 +727,42 @@ function TradingViewAIDashboard() {
               ...chartBoxStyle,
               cursor: "pointer",
               outline: idx === selectedChartIdx ? "2px solid #60a5fa" : "none",
+              position: "relative",
             }}
             onClick={() => setSelectedChartIdx(idx)}
             title={`차트 선택: ${idx + 1} (클릭하여 Pine Editor 대상 변경)`}
           >
-            <div id={id} style={{ width: "100%", height: "100%" }} />
+            {chartModes[idx] === "local" ? (
+              <LocalChart
+                id={id}
+                symbol={chartConfigs[idx]?.symbol || DEFAULT_SYMBOLS[0]}
+                timeframe={chartConfigs[idx]?.timeframe || "60"}
+                pineScript={appliedPineScripts[idx]}
+                height={360}
+              />
+            ) : (
+              <div id={id} style={{ width: "100%", height: "100%" }} />
+            )}
+            <div
+              style={{
+                position: "absolute",
+                top: 8,
+                right: 8,
+                padding: "4px 8px",
+                background: chartModes[idx] === "local" ? "#10b981" : "#3b82f6",
+                color: "#fff",
+                borderRadius: 4,
+                fontSize: 11,
+                fontWeight: 500,
+                pointerEvents: "none",
+              }}
+            >
+              {chartModes[idx] === "local" ? "로컬" : "TradingView"}
+            </div>
           </div>
         ))}
       </div>
 
-      {/* 분석 결과 / 에러 */}
       <div style={{ marginTop: 16 }}>
         {error && <div style={{ color: "#fca5a5", marginBottom: 8 }}>{error}</div>}
 
