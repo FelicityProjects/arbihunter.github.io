@@ -46,42 +46,74 @@ function TradingViewAIDashboard() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState(null);
 
-  // TradingView 위젯 로딩 (각 차트별 설정 사용)
+  // TradingView 위젯 로딩 (각 차트별 설정 사용) - 디버그 및 재시도 로직 포함
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const scriptId = "tradingview-widget-script";
 
-    const createWidgets = () => {
-      if (typeof window.TradingView === "undefined") return;
+    const createWidgets = (attempt = 1) => {
+      console.log(`[TV DEBUG] createWidgets 호출 (attempt ${attempt}), window.TradingView:`, !!window.TradingView);
+      if (typeof window.TradingView === "undefined") {
+        setError("TradingView 스크립트가 로드되지 않았습니다.");
+        return;
+      }
+      setError(null);
 
       CHART_IDS.forEach((id, idx) => {
         const container = document.getElementById(id);
-        if (!container) return;
+        console.log(`[TV DEBUG] container ${id}:`, !!container, "config:", chartConfigs[idx]);
+        if (!container) {
+          // UI에 보이도록 오류 상태 설정
+          setError((prev) => (prev ? prev + `\n컨테이너 ${id} 없음` : `컨테이너 ${id} 없음`));
+          return;
+        }
 
-        // 기존 내용 초기화
-        container.innerHTML = "";
+        try {
+          // 기존 내용 초기화
+          container.innerHTML = "";
 
-        // 컨테이너 실제 픽셀 높이를 읽어서 숫자로 전달
-        const heightPx = Math.max(200, container.clientHeight);
+          // 컨테이너 실제 픽셀 높이를 읽어서 숫자로 전달
+          const heightPx = Math.max(200, container.clientHeight);
 
-        const cfg = chartConfigs[idx] || {};
-        new window.TradingView.widget({
-          symbol: cfg.symbol || DEFAULT_SYMBOLS[0],
-          interval: cfg.timeframe || "60",
-          timezone: "Asia/Seoul",
-          theme: "dark",
-          style: "1",
-          locale: "kr",
-          container_id: id,
-          width: "100%",
-          height: heightPx,
-          autosize: false,
-          allow_symbol_change: false,
-          hide_top_toolbar: false,
-          hide_side_toolbar: false,
-          save_image: false,
-        });
+          const cfg = chartConfigs[idx] || {};
+          console.log(`[TV DEBUG] 위젯 생성 시작: id=${id}, symbol=${cfg.symbol}, interval=${cfg.timeframe}, height=${heightPx}`);
+
+          new window.TradingView.widget({
+            symbol: cfg.symbol || DEFAULT_SYMBOLS[0],
+            interval: cfg.timeframe || "60",
+            timezone: "Asia/Seoul",
+            theme: "dark",
+            style: "1",
+            locale: "kr",
+            container_id: id,
+            width: "100%",
+            height: heightPx,
+            autosize: false,
+            allow_symbol_change: false,
+            hide_top_toolbar: false,
+            hide_side_toolbar: false,
+            save_image: false,
+            overrides: {},
+          });
+
+          // 생성 직후 DOM 확인 (widget이 내부에 삽입되었는지)
+          setTimeout(() => {
+            try {
+              console.log(`[TV DEBUG] ${id} innerHTML length:`, container.innerHTML.length);
+              // 내부에 iframe/div 등 요소가 없으면 재시도
+              if (container.innerHTML.trim().length === 0 && attempt < 4) {
+                console.warn(`[TV DEBUG] ${id}에 위젯 내용 없음 — 재시도 ${attempt + 1}`);
+                setTimeout(() => createWidgets(attempt + 1), 1000);
+              }
+            } catch (e) {
+              console.error("[TV DEBUG] innerHTML 체크 오류:", e);
+            }
+          }, 600);
+        } catch (e) {
+          console.error("[TV DEBUG] widget 생성 오류:", e);
+          setError((prev) => (prev ? prev + `\nwidget 생성 오류: ${e.message}` : `widget 생성 오류: ${e.message}`));
+        }
       });
     };
 
@@ -94,17 +126,27 @@ function TradingViewAIDashboard() {
       }, 200);
     };
 
-    // tv.js가 없다면 스크립트 추가
+    // tv.js가 없다면 스크립트 추가 (onerror 추가)
     if (!document.getElementById(scriptId)) {
+      console.log("[TV DEBUG] tv.js 스크립트 추가 시도");
       const script = document.createElement("script");
       script.id = scriptId;
       script.src = "https://s3.tradingview.com/tv.js";
       script.type = "text/javascript";
       script.async = true;
-      script.onload = createWidgets;
+      script.onload = () => {
+        console.log("[TV DEBUG] tv.js 로드 완료");
+        // DOM이 완전히 렌더링되도록 짧게 지연 후 생성 시도
+        setTimeout(() => createWidgets(1), 300);
+      };
+      script.onerror = (err) => {
+        console.error("[TV DEBUG] tv.js 로드 실패", err);
+        setError("TradingView 스크립트 로드 실패 (네트워크/CSP 확인)");
+      };
       document.body.appendChild(script);
     } else {
-      createWidgets();
+      console.log("[TV DEBUG] tv.js 이미 존재, createWidgets 호출 (지연 100ms)");
+      setTimeout(() => createWidgets(1), 100);
     }
 
     window.addEventListener("resize", onResize);
