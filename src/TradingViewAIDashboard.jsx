@@ -47,7 +47,10 @@ function TradingViewAIDashboard() {
         // 기존 내용 초기화
         container.innerHTML = "";
 
-        // TradingView 위젯 생성
+        // 실제 픽셀 높이를 읽어서 숫자로 전달 (autosize 끔)
+        const heightPx = Math.max(200, container.clientHeight); // 최소값 방지
+
+        // TradingView 위젯 생성 (height는 숫자(px)로 전달)
         new window.TradingView.widget({
           symbol,
           interval: timeframe,
@@ -57,14 +60,23 @@ function TradingViewAIDashboard() {
           locale: "kr",
           container_id: id,
           width: "100%",
-          height: "100%",   // ✅ 여기 중요! 숫자(360 같은 거) 말고 "100%"
-          autosize: true,   // ✅ 컨테이너 크기에 맞춰 자동 리사이즈
+          height: heightPx,   // 픽셀 높이 전달
+          autosize: false,    // 컨테이너 크기에 의존시키지 않음(직접 높이 지정)
           allow_symbol_change: false,
           hide_top_toolbar: false,
           hide_side_toolbar: false,
           save_image: false,
         });
       });
+    };
+
+    // 리사이즈시 위젯 재생성 (디바운스)
+    let resizeTimer = null;
+    const onResize = () => {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        createWidgets();
+      }, 200);
     };
 
     // tv.js가 없다면 스크립트 추가
@@ -79,6 +91,13 @@ function TradingViewAIDashboard() {
     } else {
       createWidgets();
     }
+
+    window.addEventListener("resize", onResize);
+
+    return () => {
+      window.removeEventListener("resize", onResize);
+      if (resizeTimer) clearTimeout(resizeTimer);
+    };
   }, [symbol, timeframe]);
 
   // (예시) AI 분석 – 실제론 백엔드/모델 연동
@@ -207,7 +226,7 @@ function TradingViewAIDashboard() {
   // 차트 박스 (높이는 필요하면 여기서 숫자 조절)
   const chartBoxStyle = {
     width: "100%",
-    height: "900px", // 360px보다 크게(원하면 더 키워도 됨)
+    height: "250px", // 360px보다 크게(원하면 더 키워도 됨)
     border: "1px solid #1f2937",
     borderRadius: "8px",
     overflow: "hidden",
