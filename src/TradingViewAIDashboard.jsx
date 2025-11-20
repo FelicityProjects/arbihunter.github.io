@@ -265,41 +265,6 @@ alertcondition(short, "SELL", '{"side":"sell","symbol":"{{ticker}}","price":{{cl
     }
   };
 
-  const handleDownloadPine = (idx = selectedChartIdx) => {
-    const content = pineScripts[idx] || "";
-    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${CHART_IDS[idx]}_script.pine`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleCopyPineToClipboard = async (idx = selectedChartIdx) => {
-    try {
-      const text = pineScripts[idx] || "";
-      await navigator.clipboard.writeText(text);
-      alert(
-        "Pine 스크립트가 클립보드에 복사되었습니다. TradingView Pine Editor에 붙여넣으세요."
-      );
-      const cfg = chartConfigs[idx];
-      const sym = encodeURIComponent(cfg.symbol);
-      const interval = encodeURIComponent(
-        cfg.timeframe === "D" ? "D" : `${cfg.timeframe}`
-      );
-      window.open(
-        `https://www.tradingview.com/chart/?symbol=${sym}&interval=${interval}`,
-        "_blank"
-      );
-    } catch (e) {
-      console.error(e);
-      alert("클립보드 복사에 실패했습니다. 수동으로 복사하세요.");
-    }
-  };
-
   const handleChangePine = (value) => {
     setPineScripts((prev) => {
       const next = [...prev];
@@ -308,6 +273,7 @@ alertcondition(short, "SELL", '{"side":"sell","symbol":"{{ticker}}","price":{{cl
     });
   };
 
+  // (필요하다면 local 모드에서만 Pine Script 적용하는 로직은 유지)
   const handleApplyPineScript = () => {
     if (chartModes[selectedChartIdx] === "local") {
       const script = pineScripts[selectedChartIdx] || "";
@@ -339,75 +305,6 @@ alertcondition(short, "SELL", '{"side":"sell","symbol":"{{ticker}}","price":{{cl
         "로컬 차트 모드로 전환하면 Pine Script를 적용할 수 있습니다.\n\n현재 TradingView 모드에서는 웹 차트에서 직접 적용해야 합니다."
       );
     }
-  };
-
-  const handleLoadExampleScript = () => {
-    const examples = [
-      `//@version=5
-indicator("기본 예시", overlay=true)
-plot(close)`,
-      `//@version=5
-indicator("SMA 예시", overlay=true)
-plot(close)
-plot(sma(close, 20))`,
-      `//@version=5
-indicator("EMA 예시", overlay=true)
-plot(close)
-plot(ema(close, 12))`,
-      `//@version=5
-indicator("RSI 예시", overlay=true)
-plot(close)
-plot(rsi(close, 14))`,
-      `//@version=5
-indicator("복합 지표", overlay=true)
-plot(close)
-plot(sma(close, 20))
-plot(ema(close, 12))`,
-    ];
-    const randomExample =
-      examples[Math.floor(Math.random() * examples.length)];
-    setPineScripts((prev) => {
-      const next = [...prev];
-      next[selectedChartIdx] = randomExample;
-      return next;
-    });
-  };
-
-  const handleLoadSuperTrendScript = () => {
-    const superTrendScript = `//@version=5
-indicator("ETH SuperTrend Signals", overlay=true)
-
-len = input.int(10), factor = input.float(3.0, step=0.1)
-
-[st, dir] = ta.supertrend(factor, len)
-
-long  = dir ==  1 and dir[1] !=  1
-short = dir == -1 and dir[1] != -1
-
-plot(st, "SuperTrend", color = dir==1? color.green: color.red)
-plotshape(long,  style=shape.triangleup,   location=location.belowbar, color=color.green, text="BUY")
-plotshape(short, style=shape.triangledown, location=location.abovebar, color=color.red,   text="SELL")
-
-// 알림(웹훅 JSON, 자리표시자 사용 가능)
-alertcondition(long,  "BUY",  '{"side":"buy","symbol":"{{ticker}}","price":{{close}},"time":"{{time}}"}')
-alertcondition(short, "SELL", '{"side":"sell","symbol":"{{ticker}}","price":{{close}},"time":"{{time}}"}')`;
-    setPineScripts((prev) => {
-      const next = [...prev];
-      next[selectedChartIdx] = superTrendScript;
-      return next;
-    });
-  };
-
-  const copyPineToAll = () => {
-    setPineScripts((prev) => prev.map(() => prev[selectedChartIdx] || ""));
-  };
-
-  const updateSelectedChartConfig = (patch) => {
-    setChartConfigs((prev) => {
-      const next = [...prev];
-      next[selectedChartIdx] = { ...next[selectedChartIdx], ...patch };
-      return next;
-    });
   };
 
   const chartBoxStyle = {
@@ -494,7 +391,14 @@ plot(sma(close, 20))`}
         <select
           value={chartConfigs[selectedChartIdx]?.timeframe || "60"}
           onChange={(e) =>
-            updateSelectedChartConfig({ timeframe: e.target.value })
+            setChartConfigs((prev) => {
+              const next = [...prev];
+              next[selectedChartIdx] = {
+                ...next[selectedChartIdx],
+                timeframe: e.target.value,
+              };
+              return next;
+            })
           }
           style={{ height: 36, borderRadius: 6 }}
         >
@@ -507,7 +411,16 @@ plot(sma(close, 20))`}
 
         <select
           value={chartConfigs[selectedChartIdx]?.symbol || DEFAULT_SYMBOLS[0]}
-          onChange={(e) => updateSelectedChartConfig({ symbol: e.target.value })}
+          onChange={(e) =>
+            setChartConfigs((prev) => {
+              const next = [...prev];
+              next[selectedChartIdx] = {
+                ...next[selectedChartIdx],
+                symbol: e.target.value,
+              };
+              return next;
+            })
+          }
           style={{ height: 36, borderRadius: 6, maxWidth: 180 }}
         >
           {DEFAULT_SYMBOLS.map((s) => (
@@ -558,11 +471,11 @@ plot(sma(close, 20))`}
             fontWeight: 500,
           }}
         >
-          AI 분석 실행
+          rsi 분석
         </button>
       </div>
 
-      {/* Pine Script 도우미 버튼 */}
+      {/* Pine Script 적용 버튼만 간단히 유지 */}
       <div
         style={{
           marginBottom: 12,
@@ -588,79 +501,7 @@ plot(sma(close, 20))`}
         >
           {chartModes[selectedChartIdx] === "local"
             ? "✅ Pine Script 적용"
-            : "📋 적용 안내"}
-        </button>
-        <button
-          onClick={handleLoadSuperTrendScript}
-          style={{
-            padding: "8px 16px",
-            background: "#8b5cf6",
-            color: "#fff",
-            border: "none",
-            borderRadius: 6,
-            cursor: "pointer",
-            fontWeight: 500,
-            fontSize: 13,
-          }}
-        >
-          🚀 SuperTrend 스크립트 로드
-        </button>
-        <button
-          onClick={handleLoadExampleScript}
-          style={{
-            padding: "8px 16px",
-            background: "#1f2937",
-            color: "#e5e7eb",
-            border: "1px solid #374151",
-            borderRadius: 6,
-            cursor: "pointer",
-            fontWeight: 500,
-            fontSize: 13,
-          }}
-        >
-          📝 예시 스크립트 로드
-        </button>
-        <button
-          onClick={copyPineToAll}
-          style={{
-            padding: "8px 16px",
-            background: "#111827",
-            color: "#e5e7eb",
-            border: "1px solid #374151",
-            borderRadius: 6,
-            cursor: "pointer",
-            fontSize: 12,
-          }}
-        >
-          모든 차트에 현재 스크립트 복사
-        </button>
-        <button
-          onClick={() => handleDownloadPine(selectedChartIdx)}
-          style={{
-            padding: "8px 16px",
-            background: "#0f172a",
-            color: "#e5e7eb",
-            border: "1px solid #1f2937",
-            borderRadius: 6,
-            cursor: "pointer",
-            fontSize: 12,
-          }}
-        >
-          선택 차트 스크립트 다운로드
-        </button>
-        <button
-          onClick={() => handleCopyPineToClipboard(selectedChartIdx)}
-          style={{
-            padding: "8px 16px",
-            background: "#6b21a8",
-            color: "#fff",
-            border: "none",
-            borderRadius: 6,
-            cursor: "pointer",
-            fontSize: 12,
-          }}
-        >
-          TradingView로 복사 후 열기
+            : "로컬 모드에서 적용 가능"}
         </button>
       </div>
 
@@ -738,7 +579,7 @@ plot(sma(close, 20))`}
           </div>
         </>
       ) : (
-        // PC/태블릿: 기존처럼 2×2 그리드
+        // PC/태블릿: 2×2 그리드
         <div style={gridStyleDesktop}>
           {CHART_IDS.map((id, idx) => (
             <div

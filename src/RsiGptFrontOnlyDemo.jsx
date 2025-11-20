@@ -1,11 +1,10 @@
 // RsiGptFrontOnlyDemo.jsx
 // ✅ FastAPI 파이썬 백엔드 호출 버전
 // ✅ 여러 타임프레임(1m, 5m, 10m, 1h, 4h, 1d ...) 최신 RSI 그리드
-// ✅ 선택한 타임프레임의 "최근 10개 가격/RSI/시간/볼륨" 리스트 하단 테이블 출력
+// ✅ 선택한 타임프레임의 "최근 20개 가격/RSI/시간/볼륨" 리스트 하단 테이블 출력
 // ✅ 수동 새로고침 버튼 제거, 대신 API 호출 중인 상태를 상단에 표시
+// ✅ 캔들 리스트에 직전 캔들과의 등락(상방/하방) & 색깔 표시, 최신 캔들이 맨 위로 오도록 정렬
 // ⚠ 백엔드 엔드포인트는 FastAPI 예시(main.py)와 맞춰져 있습니다.
-//    - GET /api/indicators/latest-rsi?symbol=BTCUSDT&timeframe=1h
-//    - GET /api/indicators/recent-candles?symbol=BTCUSDT&timeframe=1h&limit=10
 
 import React, { useState, useEffect } from "react";
 
@@ -51,7 +50,7 @@ async function fetchLatestRsiFromServer(symbol, timeframe) {
 }
 
 // ❗ 실제 FastAPI 서비스 호출 (2) : 최근 N개 캔들 리스트
-async function fetchRecentCandlesFromServer(symbol, timeframe, limit = 10) {
+async function fetchRecentCandlesFromServer(symbol, timeframe, limit = 20) {
   const url =
     `${API_BASE}/api/indicators/recent-candles` +
     `?symbol=${encodeURIComponent(symbol)}` +
@@ -89,14 +88,14 @@ function formatKoreanDateTime(iso) {
 }
 
 const RsiGptFrontOnlyDemo = () => {
-  // 기본 심볼
+  // ✅ 기본 심볼: 비트코인 (BTCUSDT)
   const [symbol, setSymbol] = useState("BTCUSDT");
 
   // 각 타임프레임별 RSI 값 저장용
   const [rsiMap, setRsiMap] = useState({});
   const [selectedTf, setSelectedTf] = useState("1h");
 
-  // 선택된 타임프레임의 최근 10개 캔들
+  // 선택된 타임프레임의 최근 20개 캔들 (최신이 맨 위)
   const [recentCandles, setRecentCandles] = useState([]);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -109,7 +108,7 @@ const RsiGptFrontOnlyDemo = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [symbol, selectedTf]);
 
-  // 모든 타임프레임의 최신 RSI + 선택된 타임프레임의 최근 10개 캔들 갱신
+  // 모든 타임프레임의 최신 RSI + 선택된 타임프레임의 최근 20개 캔들 갱신
   const refreshAllTimeframesAndCandles = async () => {
     try {
       setIsLoading(true);
@@ -128,13 +127,17 @@ const RsiGptFrontOnlyDemo = () => {
       });
       setRsiMap(nextMap);
 
-      // 2) 선택된 타임프레임의 최근 10개 캔들
+      // 2) 선택된 타임프레임의 최근 20개 캔들
       const candles = await fetchRecentCandlesFromServer(
         symbol,
         selectedTf,
-        10
+        20
       );
-      setRecentCandles(candles);
+      // 🔹 최신 캔들이 맨 위로 오도록 시간 기준 내림차순 정렬
+      const sortedCandles = [...candles].sort(
+        (a, b) => new Date(b.time) - new Date(a.time)
+      );
+      setRecentCandles(sortedCandles);
 
       setLastUpdatedAll(new Date().toISOString());
     } catch (e) {
@@ -147,7 +150,6 @@ const RsiGptFrontOnlyDemo = () => {
 
   const handleSelectTimeframe = (tf) => {
     setSelectedTf(tf);
-    // selectedTf 변화는 useEffect에서 감지되어 자동으로 전체 갱신
   };
 
   return (
@@ -183,7 +185,7 @@ const RsiGptFrontOnlyDemo = () => {
             letterSpacing: "-0.02em",
           }}
         >
-          다중 타임프레임 RSI + 최근 10개 캔들
+          다중 타임프레임 RSI + 최근 20개 캔들
         </h1>
 
         {/* API 호출 상태 표시 배지 */}
@@ -230,14 +232,14 @@ const RsiGptFrontOnlyDemo = () => {
           lineHeight: 1.5,
         }}
       >
-        심볼 하나에 대해 1m · 10m · 1h · 4h · 1d 등 여러 타임프레임의 최신 RSI를
-        위쪽 그리드에서 확인하고,
+        비트코인 / 이더리움 심볼에 대해 1m · 10m · 1h · 4h · 1d 등 여러 타임프레임의
+        최신 RSI를 위쪽 그리드에서 확인하고,
         <br />
-        아래 리스트에서 <strong>선택한 타임프레임의 최근 10개 캔들(가격 + RSI + 볼륨)</strong>
-        정보를 확인하는 컴포넌트입니다.
+        아래 리스트에서 <strong>선택한 타임프레임의 최근 20개 캔들(가격 + RSI + 볼륨)</strong>
+        및 <strong>직전 캔들과의 등락(상방/하방)</strong>을 확인할 수 있는 컴포넌트입니다.
       </p>
 
-      {/* 심볼 입력 (입력 변경 시 자동으로 API 호출) */}
+      {/* 심볼 선택: 비트코인 / 이더리움 */}
       <div
         style={{
           display: "flex",
@@ -247,7 +249,7 @@ const RsiGptFrontOnlyDemo = () => {
           marginBottom: 12,
         }}
       >
-        <div style={{ flex: "1 1 120px", minWidth: 160 }}>
+        <div style={{ flex: "1 1 160px", minWidth: 140 }}>
           <label
             style={{
               fontSize: 11,
@@ -256,9 +258,9 @@ const RsiGptFrontOnlyDemo = () => {
               marginBottom: 4,
             }}
           >
-            심볼 (예: BTCUSDT, ETHUSDT)
+            심볼 선택
           </label>
-          <input
+          <select
             value={symbol}
             onChange={(e) => setSymbol(e.target.value)}
             style={{
@@ -267,8 +269,12 @@ const RsiGptFrontOnlyDemo = () => {
               fontSize: 13,
               borderRadius: 8,
               border: "1px solid #d1d5db",
+              backgroundColor: "#ffffff",
             }}
-          />
+          >
+            <option value="BTCUSDT">비트코인 (BTCUSDT)</option>
+            <option value="ETHUSDT">이더리움 (ETHUSDT)</option>
+          </select>
         </div>
       </div>
 
@@ -422,7 +428,7 @@ const RsiGptFrontOnlyDemo = () => {
         </div>
       </div>
 
-      {/* 하단: 선택 타임프레임 기준 최근 10개 캔들 리스트 */}
+      {/* 하단: 선택 타임프레임 기준 최근 20개 캔들 리스트 */}
       <div
         style={{
           borderRadius: 12,
@@ -449,7 +455,7 @@ const RsiGptFrontOnlyDemo = () => {
                 marginBottom: 2,
               }}
             >
-              최근 10개 캔들 · {symbol} · {selectedTf.toUpperCase()}
+              최근 20개 캔들 · {symbol} · {selectedTf.toUpperCase()}
             </div>
             <div
               style={{
@@ -457,7 +463,8 @@ const RsiGptFrontOnlyDemo = () => {
                 color: "#6b7280",
               }}
             >
-              시간 · 종가 · RSI · 고가 · 저가 · 거래량 등을 확인할 수 있습니다.
+              시간 · 종가 · <strong>등락(직전 캔들 대비)</strong> · RSI · 고가 · 저가 · 거래량
+              등을 확인할 수 있습니다.
             </div>
           </div>
         </div>
@@ -471,7 +478,7 @@ const RsiGptFrontOnlyDemo = () => {
           <table
             style={{
               width: "100%",
-              minWidth: 620,
+              minWidth: 720,
               borderCollapse: "collapse",
               fontSize: 11,
               opacity: isLoading ? 0.6 : 1,
@@ -503,6 +510,17 @@ const RsiGptFrontOnlyDemo = () => {
                   }}
                 >
                   종가
+                </th>
+                {/* 새 컬럼: 직전 캔들과 등락 */}
+                <th
+                  style={{
+                    textAlign: "right",
+                    padding: "6px 8px",
+                    fontWeight: 600,
+                    color: "#4b5563",
+                  }}
+                >
+                  등락(직전 캔들)
                 </th>
                 <th
                   style={{
@@ -554,6 +572,39 @@ const RsiGptFrontOnlyDemo = () => {
                   if (candle.rsi >= 70) rsiColor = "#b91c1c";
                   else if (candle.rsi <= 30) rsiColor = "#1d4ed8";
 
+                  // 🔹 직전(이전 시간) 캔들과 등락 계산
+                  // 배열 0번이 최신, 1번이 그 바로 이전, ... 이라고 가정
+                  const prevCandle =
+                    idx < recentCandles.length - 1
+                      ? recentCandles[idx + 1]
+                      : null;
+
+                  let changeText = "-";
+                  let changeColor = "#6b7280";
+
+                  if (prevCandle && prevCandle.close) {
+                    const prevClose = Number(prevCandle.close); // 직전 캔들 종가
+                    const currClose = Number(candle.close); // 현재 행 종가
+                    const diff = currClose - prevClose;
+                    const diffPct =
+                      prevClose !== 0
+                        ? (diff / prevClose) * 100
+                        : 0;
+
+                    const dirLabel =
+                      diff > 0 ? "상방" : diff < 0 ? "하방" : "보합";
+                    const arrow =
+                      diff > 0 ? "▲" : diff < 0 ? "▼" : "■";
+                    const sign = diff > 0 ? "+" : diff < 0 ? "" : "";
+
+                    changeText = `${arrow} ${dirLabel} ${sign}${diffPct.toFixed(
+                      2
+                    )}%`;
+
+                    if (diff > 0) changeColor = "#b91c1c"; // 상승: 빨강
+                    else if (diff < 0) changeColor = "#1d4ed8"; // 하락: 파랑
+                  }
+
                   return (
                     <tr
                       key={idx}
@@ -582,6 +633,17 @@ const RsiGptFrontOnlyDemo = () => {
                           minimumFractionDigits: 2,
                           maximumFractionDigits: 2,
                         })}
+                      </td>
+                      {/* 새 컬럼: 등락(상방/하방) */}
+                      <td
+                        style={{
+                          padding: "5px 8px",
+                          textAlign: "right",
+                          color: changeColor,
+                          fontWeight: idx === 0 ? 700 : 500,
+                        }}
+                      >
+                        {changeText}
                       </td>
                       <td
                         style={{
@@ -626,7 +688,7 @@ const RsiGptFrontOnlyDemo = () => {
               ) : (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     style={{
                       padding: "10px 8px",
                       textAlign: "center",
@@ -655,8 +717,9 @@ const RsiGptFrontOnlyDemo = () => {
         🔎 Tip: FastAPI 서버(main.py)의 엔드포인트 주소만 맞다면
         이 컴포넌트는 그대로 백엔드와 연동해서 사용할 수 있습니다.
         <br />
-        심볼/타임프레임을 변경하면 자동으로 서비스 호출이 일어나며,
-        상단의 <strong>“서비스 호출 중...”</strong> 배지로 호출 상태를 확인할 수 있습니다.
+        비트코인/이더리움 심볼과 타임프레임을 변경하면 자동으로 서비스 호출이 일어나며,
+        상단의 <strong>“서비스 호출 중...”</strong> 배지와
+        하단 <strong>등락(상방/하방)</strong> 컬럼으로 흐름을 한눈에 볼 수 있습니다.
       </div>
     </div>
   );
