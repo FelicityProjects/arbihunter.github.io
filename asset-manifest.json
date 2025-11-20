@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/arbihunter.github.io/static/css/main.f855e6bc.css",
-    "main.js": "/arbihunter.github.io/static/js/main.cf8c6c81.js",
+    "main.js": "/arbihunter.github.io/static/js/main.0ee662ef.js",
     "static/js/453.0a627fe2.chunk.js": "/arbihunter.github.io/static/js/453.0a627fe2.chunk.js",
     "index.html": "/arbihunter.github.io/index.html",
     "main.f855e6bc.css.map": "/arbihunter.github.io/static/css/main.f855e6bc.css.map",
-    "main.cf8c6c81.js.map": "/arbihunter.github.io/static/js/main.cf8c6c81.js.map",
+    "main.0ee662ef.js.map": "/arbihunter.github.io/static/js/main.0ee662ef.js.map",
     "453.0a627fe2.chunk.js.map": "/arbihunter.github.io/static/js/453.0a627fe2.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.f855e6bc.css",
-    "static/js/main.cf8c6c81.js"
+    "static/js/main.0ee662ef.js"
   ]
 }
