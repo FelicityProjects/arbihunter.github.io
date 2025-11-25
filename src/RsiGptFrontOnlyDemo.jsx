@@ -11,7 +11,7 @@ import React, { useState, useEffect } from "react";
 // ====== 환경별 API 베이스 URL 설정 ======
 const API_BASE =
   import.meta?.env?.VITE_API_BASE_URL ||
-  "http://localhost:8000";
+  "https://fastapi-rsi-c3h0eshmc9g5ffff.koreasouth-01.azurewebsites.net";
 
 // 화면에 보여줄 타임프레임 목록
 const TIMEFRAME_OPTIONS = [
@@ -27,10 +27,14 @@ const TIMEFRAME_OPTIONS = [
 
 // ❗ 실제 FastAPI 서비스 호출 (1) : 최신 RSI 한 개
 async function fetchLatestRsiFromServer(symbol, timeframe) {
+
+
   const url =
     `${API_BASE}/api/indicators/latest-rsi` +
     `?symbol=${encodeURIComponent(symbol)}` +
     `&timeframe=${encodeURIComponent(timeframe)}`;
+
+  console.log(url , " =======> url");
 
   const res = await fetch(url, {
     method: "GET",
