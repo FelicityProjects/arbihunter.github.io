@@ -34,8 +34,6 @@ async function fetchLatestRsiFromServer(symbol, timeframe) {
     `?symbol=${encodeURIComponent(symbol)}` +
     `&timeframe=${encodeURIComponent(timeframe)}`;
 
-  console.log(url , " =======> url");
-
   const res = await fetch(url, {
     method: "GET",
   });

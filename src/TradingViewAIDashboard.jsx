@@ -53,23 +53,15 @@ function TradingViewAIDashboard() {
   const [pineScripts, setPineScripts] = useState(
     CHART_IDS.map(
       () =>
-        `//@version=5
-indicator("ETH SuperTrend Signals", overlay=true)
-
-len = input.int(10), factor = input.float(3.0, step=0.1)
-
-[st, dir] = ta.supertrend(factor, len)
-
-long  = dir ==  1 and dir[1] !=  1
-short = dir == -1 and dir[1] != -1
-
-plot(st, "SuperTrend", color = dir==1? color.green: color.red)
-plotshape(long,  style=shape.triangleup,   location=location.belowbar, color=color.green, text="BUY")
-plotshape(short, style=shape.triangledown, location=location.abovebar, color=color.red,   text="SELL")
-
-// 알림(웹훅 JSON, 자리표시자 사용 가능)
-alertcondition(long,  "BUY",  '{"side":"buy","symbol":"{{ticker}}","price":{{close}},"time":"{{time}}"}')
-alertcondition(short, "SELL", '{"side":"sell","symbol":"{{ticker}}","price":{{close}},"time":"{{time}}"}')`
+        `to do
+    1.4분할 차트 생성 및 git  - > 20251117 시작 -> 20251118 완료
+    2.rsi 분석 팝업 화면 -> 20251119 시작 -> 20251119 완료
+    3.rsi 데이터 조회 api(fastapi) 생성 및 화면연동 -> 20251120 시작 -> 20251121 완료
+    4.github actions 배포 자동화 (microsoft azure service) -> 20251124 완
+    5.azure appservice 환경 설정 및 테스트 -> 20251125 완
+    6.rsi 지표를 통한 매수 매도 알고리즘 구현 ... 
+    7.생성형 ai 기반 투자 전략 학습 구현 ...
+      `
     )
   );
 
