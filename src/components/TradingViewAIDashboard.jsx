@@ -10,6 +10,7 @@ const CHART_IDS = [
 ];
 
 const TIMEFRAMES = [
+  { label: "1m", value: "1" },
   { label: "15m", value: "15" },
   { label: "1H", value: "60" },
   { label: "4H", value: "240" },
@@ -461,23 +462,7 @@ function TradingViewAIDashboard() {
       <div style={toolbarStyle}>
         <div style={labelStyle}>선택 차트: #{selectedChartIdx + 1}</div>
 
-        <button
-          onClick={handleRunAnalysis}
-          style={{
-            height: 36,
-            padding: "0 12px",
-            borderRadius: 6,
-            border: "none",
-            background: "#3b82f6",
-            color: "#fff",
-            cursor: "pointer",
-            fontWeight: 500,
-            fontSize: 13,
-            marginRight: 8,
-          }}
-        >
-          📊 RSI 분석
-        </button>
+
 
         <select
           value={chartConfigs[selectedChartIdx]?.timeframe || "60"}
@@ -491,7 +476,7 @@ function TradingViewAIDashboard() {
               return next;
             })
           }
-          style={{ height: 36, borderRadius: 6 }}
+          style={{ height: 30, borderRadius: 6, fontSize: 13, padding: "0 8px" }}
         >
           {TIMEFRAMES.map((t) => (
             <option key={t.value} value={t.value}>
@@ -512,7 +497,7 @@ function TradingViewAIDashboard() {
               return next;
             })
           }
-          style={{ height: 36, borderRadius: 6, maxWidth: 180 }}
+          style={{ height: 30, borderRadius: 6, maxWidth: 180, fontSize: 13, padding: "0 8px" }}
         >
           {DEFAULT_SYMBOLS.map((s) => (
             <option key={s} value={s}>
@@ -520,6 +505,28 @@ function TradingViewAIDashboard() {
             </option>
           ))}
         </select>
+
+        <button
+          onClick={handleRunAnalysis}
+          style={{
+            height: 36,
+            padding: "0 16px",
+            borderRadius: 6,
+            border: "none",
+            background: "linear-gradient(135deg, #8b5cf6, #ec4899)", // Violet to Pink gradient
+            color: "#fff",
+            cursor: "pointer",
+            fontWeight: 600,
+            fontSize: 13,
+            marginLeft: "16px", // Moved from auto to 16px
+            boxShadow: "0 4px 12px rgba(139, 92, 246, 0.3)",
+            transition: "all 0.2s",
+          }}
+          onMouseOver={(e) => (e.currentTarget.style.transform = "translateY(-1px)")}
+          onMouseOut={(e) => (e.currentTarget.style.transform = "translateY(0)")}
+        >
+          📊 RSI 분석
+        </button>
 
       </div>
 
@@ -685,7 +692,18 @@ function TradingViewAIDashboard() {
               </button>
             </div>
 
-            <RsiGptFrontOnlyDemo />
+            <RsiGptFrontOnlyDemo
+              activeSymbol={chartConfigs[selectedChartIdx]?.symbol?.replace("BINANCE:", "") || "BTCUSDT"}
+              activeTimeframe={(() => {
+                const tf = chartConfigs[selectedChartIdx]?.timeframe || "60";
+                if (tf === "1") return "1m";
+                if (tf === "15") return "15m";
+                if (tf === "60") return "1h";
+                if (tf === "240") return "4h";
+                if (tf === "D") return "1d";
+                return "1h"; // Default fallback
+              })()}
+            />
           </div>
         </div>
       )}

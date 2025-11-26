@@ -89,13 +89,13 @@ function formatKoreanDateTime(iso) {
   }
 }
 
-const RsiGptFrontOnlyDemo = () => {
+const RsiGptFrontOnlyDemo = ({ activeSymbol, activeTimeframe }) => {
   // ✅ 기본 심볼: 비트코인 (BTCUSDT)
-  const [symbol, setSymbol] = useState("BTCUSDT");
+  const [symbol, setSymbol] = useState(activeSymbol || "BTCUSDT");
 
   // 각 타임프레임별 RSI 값 저장용
   const [rsiMap, setRsiMap] = useState({});
-  const [selectedTf, setSelectedTf] = useState("1h");
+  const [selectedTf, setSelectedTf] = useState(activeTimeframe || "1h");
 
   // 선택된 타임프레임의 최근 20개 캔들 (최신이 맨 위)
   const [recentCandles, setRecentCandles] = useState([]);
@@ -104,8 +104,18 @@ const RsiGptFrontOnlyDemo = () => {
   const [lastUpdatedAll, setLastUpdatedAll] = useState(null);
   const [error, setError] = useState(null);
 
-  // 심볼 또는 선택된 타임프레임이 바뀔 때마다 자동으로 전체 갱신
+  // Sync state with props
   useEffect(() => {
+    if (activeSymbol) setSymbol(activeSymbol);
+  }, [activeSymbol]);
+
+  useEffect(() => {
+    // Map TradingView timeframe codes to API timeframe codes if necessary
+    // Assuming API accepts "1M", "60" (for 1h?), "D" (for 1d?)
+    // Wait, TIMEFRAME_OPTIONS are "1m", "5m", ... "1d", "1M"
+    // But TradingView passes "60", "240", "D", "1M"
+    // We need a mapping function or logic here.
+    // Let's implement a simple mapper.
     refreshAllTimeframesAndCandles();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [symbol, selectedTf]);
@@ -374,24 +384,34 @@ const RsiGptFrontOnlyDemo = () => {
 
             // RSI 색상: 과매수/과매도 대략적인 느낌
             let valueColor = "#111827";
-            if (info?.rsi >= 70) valueColor = "#b91c1c";
-            else if (info?.rsi <= 30) valueColor = "#1d4ed8";
+            let bgColor = "#f9fafb"; // Default light gray for unselected
+
+            if (info?.rsi >= 70) {
+              valueColor = "#b91c1c";
+              bgColor = "#fef2f2"; // Light red for overbought
+            } else if (info?.rsi <= 30) {
+              valueColor = "#1d4ed8";
+              bgColor = "#eff6ff"; // Light blue for oversold
+            }
 
             return (
               <div
                 key={tf}
+                onClick={() => handleSelectTimeframe(tf)}
                 style={{
                   borderRadius: 10,
                   padding: 8,
-                  background: isActive ? "#111827" : "#ffffff",
+                  background: isActive ? "#1e293b" : bgColor,
                   border: isActive
-                    ? "1px solid #111827"
+                    ? "2px solid #3b82f6" // Blue border for active
                     : "1px solid #e5e7eb",
                   color: isActive ? "#f9fafb" : "#111827",
                   boxShadow: isActive
-                    ? "0 4px 10px rgba(15,23,42,0.35)"
+                    ? "0 4px 12px rgba(59, 130, 246, 0.5)" // Blue shadow
                     : "none",
-                  transition: "background 0.1s ease, box-shadow 0.1s ease",
+                  cursor: "pointer", // Pointer cursor
+                  transition: "all 0.2s ease",
+                  transform: isActive ? "scale(1.02)" : "scale(1)",
                 }}
               >
                 <div
