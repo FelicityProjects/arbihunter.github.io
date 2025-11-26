@@ -27,8 +27,18 @@ const DEFAULT_SYMBOLS = [
 
 // Refactored To-Do Data
 const TODO_DATA = [
-  { id: 1, status: 'done', title: '4분할 차트 생성 및 git', desc: '20251117 시작 -> 20251118 완료' },
-  { id: 2, status: 'done', title: 'RSI 분석 팝업 화면', desc: '20251119 시작 -> 20251119 완료' },
+  {
+    id: 1,
+    status: 'done',
+    title: '프로젝트 초기 설정 및 4분할 차트 구현 (2025.11.17)',
+    desc: '✅ React 프로젝트 생성\n✅ TradingView 위젯 연동\n✅ 4분할 그리드 레이아웃 구현\n✅ GitHub Pages 배포 환경 구성 완료'
+  },
+  {
+    id: 2,
+    status: 'done',
+    title: 'RSI 분석 팝업 화면 구현 (2025.11.19)',
+    desc: '✅ RSI 분석 모달 UI 구현\n✅ 다중 타임프레임 RSI 그리드 표시\n✅ 최근 20개 캔들 데이터 테이블 시각화\n✅ 선택된 차트와 데이터 동기화 구현'
+  },
   { id: 3, status: 'done', title: 'RSI 데이터 조회 API 연동', desc: 'FastAPI, 20251120 시작 -> 20251121 완료' },
   { id: 4, status: 'done', title: 'GitHub Actions 배포 자동화', desc: 'Microsoft Azure Service, 20251124 완료' },
   { id: 5, status: 'done', title: 'Azure AppService 환경 설정', desc: '20251125 완료' },
@@ -202,9 +212,13 @@ function TradingViewAIDashboard() {
             container_id: id,
             autosize: true,
             allow_symbol_change: false,
+            enable_publishing: false,
             hide_top_toolbar: false,
             hide_side_toolbar: false,
             save_image: false,
+            details: false,
+            hotlist: false,
+            calendar: false,
             overrides: {},
           });
 
@@ -365,18 +379,34 @@ function TradingViewAIDashboard() {
                   onClick={() => setSelectedTodo(item)}
                   onDoubleClick={() => handleEditClick(item)}
                   style={{
-                    padding: "8px",
+                    padding: "10px",
                     marginBottom: 8,
                     borderRadius: 6,
-                    background: selectedTodo?.id === item.id ? "#374151" : "transparent",
+                    background: selectedTodo?.id === item.id ? "#374151" : "#2d3748",
+                    border: selectedTodo?.id === item.id ? "1px solid #3b82f6" : "1px solid #4b5563",
                     cursor: "pointer",
                     fontSize: 13,
-                    color: "#d1d5db",
-                    transition: "background 0.2s",
+                    color: "#e5e7eb",
+                    transition: "all 0.2s",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    boxShadow: "0 1px 2px rgba(0,0,0,0.2)"
                   }}
-                  onMouseOver={(e) => { if (selectedTodo?.id !== item.id) e.currentTarget.style.background = "#374151" }}
-                  onMouseOut={(e) => { if (selectedTodo?.id !== item.id) e.currentTarget.style.background = "transparent" }}
+                  onMouseOver={(e) => {
+                    if (selectedTodo?.id !== item.id) {
+                      e.currentTarget.style.background = "#4b5563";
+                      e.currentTarget.style.transform = "translateY(-1px)";
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (selectedTodo?.id !== item.id) {
+                      e.currentTarget.style.background = "#2d3748";
+                      e.currentTarget.style.transform = "translateY(0)";
+                    }
+                  }}
                 >
+                  <span style={{ color: "#34d399", fontSize: 10 }}>●</span>
                   {item.title}
                 </li>
               ))}
@@ -413,18 +443,34 @@ function TradingViewAIDashboard() {
                   onClick={() => setSelectedTodo(item)}
                   onDoubleClick={() => handleEditClick(item)}
                   style={{
-                    padding: "8px",
+                    padding: "10px",
                     marginBottom: 8,
                     borderRadius: 6,
-                    background: selectedTodo?.id === item.id ? "#374151" : "transparent",
+                    background: selectedTodo?.id === item.id ? "#374151" : "#2d3748",
+                    border: selectedTodo?.id === item.id ? "1px solid #3b82f6" : "1px solid #4b5563",
                     cursor: "pointer",
                     fontSize: 13,
-                    color: "#d1d5db",
-                    transition: "background 0.2s",
+                    color: "#e5e7eb",
+                    transition: "all 0.2s",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    boxShadow: "0 1px 2px rgba(0,0,0,0.2)"
                   }}
-                  onMouseOver={(e) => { if (selectedTodo?.id !== item.id) e.currentTarget.style.background = "#374151" }}
-                  onMouseOut={(e) => { if (selectedTodo?.id !== item.id) e.currentTarget.style.background = "transparent" }}
+                  onMouseOver={(e) => {
+                    if (selectedTodo?.id !== item.id) {
+                      e.currentTarget.style.background = "#4b5563";
+                      e.currentTarget.style.transform = "translateY(-1px)";
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (selectedTodo?.id !== item.id) {
+                      e.currentTarget.style.background = "#2d3748";
+                      e.currentTarget.style.transform = "translateY(0)";
+                    }
+                  }}
                 >
+                  <span style={{ color: "#60a5fa", fontSize: 10 }}>●</span>
                   {item.title}
                 </li>
               ))}
@@ -444,7 +490,16 @@ function TradingViewAIDashboard() {
                 <div style={{ fontSize: 12, color: selectedTodo.status === 'done' ? "#34d399" : "#60a5fa", marginBottom: 12 }}>
                   {selectedTodo.status === 'done' ? "완료됨" : "계획됨"}
                 </div>
-                <div style={{ fontSize: 13, color: "#9ca3af", lineHeight: 1.6 }}>
+                <div style={{
+                  fontSize: 13,
+                  color: "#d1d5db",
+                  lineHeight: 1.6,
+                  whiteSpace: "pre-wrap", // Enable line breaks
+                  background: "#1f2937",
+                  padding: "12px",
+                  borderRadius: "6px",
+                  border: "1px solid #374151"
+                }}>
                   {selectedTodo.desc}
                 </div>
               </div>
