@@ -157,6 +157,7 @@ const RsiGptFrontOnlyDemo = () => {
   return (
     <div
       style={{
+        position: "relative", // 오버레이를 위한 relative 포지션
         maxWidth: 900,
         margin: "24px auto",
         padding: 16,
@@ -421,8 +422,8 @@ const RsiGptFrontOnlyDemo = () => {
                   {info
                     ? formatKoreanDateTime(info.updatedAt)
                     : isLoading
-                    ? "불러오는 중..."
-                    : "데이터 없음"}
+                      ? "불러오는 중..."
+                      : "데이터 없음"}
                 </div>
               </div>
             );
@@ -723,6 +724,64 @@ const RsiGptFrontOnlyDemo = () => {
         상단의 <strong>“서비스 호출 중...”</strong> 배지와
         하단 <strong>등락(상방/하방)</strong> 컬럼으로 흐름을 한눈에 볼 수 있습니다.
       </div>
+
+      {/* 로딩 오버레이 */}
+      {isLoading && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundColor: "rgba(255, 255, 255, 0.85)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 50,
+            borderRadius: 16,
+            backdropFilter: "blur(2px)",
+          }}
+        >
+          <div
+            style={{
+              background: "#ffffff",
+              padding: "24px 32px",
+              borderRadius: 12,
+              boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+              textAlign: "center",
+              border: "1px solid #e5e7eb",
+            }}
+          >
+            <div
+              style={{
+                width: 40,
+                height: 40,
+                border: "4px solid #e5e7eb",
+                borderTop: "4px solid #3b82f6",
+                borderRadius: "50%",
+                margin: "0 auto 16px",
+                animation: "spin 1s linear infinite",
+              }}
+            />
+            <style>
+              {`
+                @keyframes spin {
+                  0% { transform: rotate(0deg); }
+                  100% { transform: rotate(360deg); }
+                }
+              `}
+            </style>
+            <h3 style={{ margin: "0 0 12px", fontSize: 20, fontWeight: 700, color: "#111827" }}>
+              서비스 연결 중
+            </h3>
+            <p style={{ margin: 0, fontSize: 15, color: "#374151", lineHeight: 1.6 }}>
+              <span style={{ fontWeight: 600, color: "#2563eb" }}>Azure</span>에 등록한 서비스를 동작중입니다.
+              <br />
+              최초 요청 시 구동 시간이 소요될 수 있습니다.
+              <br />
+              <span style={{ fontWeight: 600 }}>잠시만 기다려주세요.</span>
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,6 +1,6 @@
 // ...existing code...
 import './App.css';
-import TradingViewAIDashboard from './TradingViewAIDashboard';
+import TradingViewAIDashboard from './components/TradingViewAIDashboard';
 
 function App() {
   return <TradingViewAIDashboard />;
