@@ -344,9 +344,31 @@ function TradingViewAIDashboard() {
           <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>
             TradingView AI Dashboard
           </h1>
-          <span style={{ fontSize: 14, color: "#94a3b8", marginLeft: 8 }}>
-            - 실시간 4분할 차트 및 AI 기반 투자 전략 대시보드
-          </span>
+          <div style={{ display: "flex", flexDirection: "column", marginLeft: 12, gap: 2 }}>
+            <span style={{ fontSize: 12, color: "#94a3b8" }}>
+              📅 Project Start: 2025.11.17 ~
+            </span>
+            <div style={{ display: "flex", gap: 8, fontSize: 12, color: "#94a3b8", alignItems: "center" }}>
+              <span>🔗 GitHub:</span>
+              <a
+                href="https://github.com/FelicityProjects/arbihunter.github.io"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "#60a5fa", textDecoration: "none" }}
+              >
+                Frontend
+              </a>
+              <span style={{ color: "#475569" }}>|</span>
+              <a
+                href="https://github.com/FelicityProjects/fastapi-azure-rsi"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "#60a5fa", textDecoration: "none" }}
+              >
+                Backend
+              </a>
+            </div>
+          </div>
         </div>
 
         <div style={{ display: "flex", gap: 12 }}>
