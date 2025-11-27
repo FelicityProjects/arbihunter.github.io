@@ -30,18 +30,33 @@ const TODO_DATA = [
   {
     id: 1,
     status: 'done',
-    title: '프로젝트 초기 설정 및 4분할 차트 구현 (2025.11.17)',
+    title: '프로젝트 초기 설정 및 4분할 차트 구현',
     desc: '✅ React 프로젝트 생성\n✅ TradingView 위젯 연동\n✅ 4분할 그리드 레이아웃 구현\n✅ GitHub Pages 배포 환경 구성 완료'
   },
   {
     id: 2,
     status: 'done',
-    title: 'RSI 분석 팝업 화면 구현 (2025.11.19)',
+    title: 'RSI 분석 팝업 화면 구현',
     desc: '✅ RSI 분석 모달 UI 구현\n✅ 다중 타임프레임 RSI 그리드 표시\n✅ 최근 20개 캔들 데이터 테이블 시각화\n✅ 선택된 차트와 데이터 동기화 구현'
   },
-  { id: 3, status: 'done', title: 'RSI 데이터 조회 API 연동', desc: 'FastAPI, 20251120 시작 -> 20251121 완료' },
-  { id: 4, status: 'done', title: 'GitHub Actions 배포 자동화', desc: 'Microsoft Azure Service, 20251124 완료' },
-  { id: 5, status: 'done', title: 'Azure AppService 환경 설정', desc: '20251125 완료' },
+  {
+    id: 3,
+    status: 'done',
+    title: 'RSI 데이터 조회 API 연동',
+    desc: '✅ FastAPI 기반 백엔드 서버 구축\n✅ Binance Spot API 연동 (OHLC 데이터)\n✅ RSI 지표 계산 로직 구현 (EMA 방식)\n✅ 프론트엔드 연동을 위한 CORS 및 엔드포인트 설정'
+  },
+  {
+    id: 4,
+    status: 'done',
+    title: 'GitHub Actions 배포 자동화',
+    desc: '✅ Microsoft Azure Service 연동\n✅ GitHub Actions Workflow 설정\n✅ CI/CD 배포 파이프라인 구축 완료'
+  },
+  {
+    id: 5,
+    status: 'done',
+    title: 'Azure AppService 환경 설정',
+    desc: '✅ Azure Web App 리소스 생성\n✅ Node.js 18 LTS 런타임 설정\n✅ 배포 프로필(Publish Profile) 연동 완료'
+  },
   { id: 6, status: 'planned', title: 'RSI 지표 매수/매도 알고리즘', desc: '구현 예정...' },
   { id: 7, status: 'planned', title: '생성형 AI 투자 전략 학습', desc: '구현 예정...' },
 ];
@@ -68,7 +83,7 @@ function TradingViewAIDashboard() {
     }))
   );
 
-  const [selectedChartIdx, setSelectedChartIdx] = useState(0);
+
 
   // To-Do List State
   const [todos, setTodos] = useState(TODO_DATA);
@@ -121,7 +136,7 @@ function TradingViewAIDashboard() {
     setEditingTodo(null);
   };
 
-  const [customSymbol, setCustomSymbol] = useState("");
+
   const [analysis, setAnalysis] = useState(null);
   const [error, setError] = useState(null);
   const [showRsiView, setShowRsiView] = useState(false);
@@ -130,41 +145,7 @@ function TradingViewAIDashboard() {
   const widgetRefs = useRef([]);
 
   // 모바일 스와이프를 위한 touch ref
-  const touchStartXRef = useRef(null);
-  const touchEndXRef = useRef(null);
 
-  const handleTouchStart = (e) => {
-    if (!isMobile) return;
-    touchStartXRef.current = e.touches[0].clientX;
-  };
-
-  const handleTouchMove = (e) => {
-    if (!isMobile) return;
-    touchEndXRef.current = e.touches[0].clientX;
-  };
-
-  const handleTouchEnd = () => {
-    if (!isMobile) return;
-    if (touchStartXRef.current === null || touchEndXRef.current === null) return;
-
-    const diff = touchStartXRef.current - touchEndXRef.current;
-    const threshold = 50; // 스와이프 판정 기준(px)
-
-    if (Math.abs(diff) > threshold) {
-      if (diff > 0) {
-        // 왼쪽으로 스와이프 → 다음 차트
-        setSelectedChartIdx((prev) => (prev + 1) % CHART_IDS.length);
-      } else {
-        // 오른쪽으로 스와이프 → 이전 차트
-        setSelectedChartIdx((prev) =>
-          prev === 0 ? CHART_IDS.length - 1 : prev - 1
-        );
-      }
-    }
-
-    touchStartXRef.current = null;
-    touchEndXRef.current = null;
-  };
 
   // TradingView 위젯 로딩 (각 차트별 설정 사용)
   useEffect(() => {
@@ -290,19 +271,7 @@ function TradingViewAIDashboard() {
     setShowRsiView(true);
   };
 
-  const handleApplyCustomSymbol = () => {
-    if (customSymbol.trim()) {
-      setChartConfigs((prev) => {
-        const next = [...prev];
-        next[selectedChartIdx] = {
-          ...next[selectedChartIdx],
-          symbol: customSymbol.trim().toUpperCase(),
-        };
-        return next;
-      });
-      setCustomSymbol("");
-    }
-  };
+
 
   const chartBoxStyle = {
     width: "100%",
@@ -345,7 +314,7 @@ function TradingViewAIDashboard() {
       {/* 3-Column To-Do List Section */}
       <div style={{ marginBottom: 24 }}>
         <h3 style={{ margin: "0 0 12px", fontSize: 18, fontWeight: 700, color: "#e5e7eb" }}>
-          🚀 Project To-Do List
+          🚀 Project To-Do List (2025.11.27 ~ )
         </h3>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
 
@@ -515,52 +484,6 @@ function TradingViewAIDashboard() {
 
       {/* 툴바 */}
       <div style={toolbarStyle}>
-        <div style={labelStyle}>선택 차트: #{selectedChartIdx + 1}</div>
-
-
-
-        <select
-          value={chartConfigs[selectedChartIdx]?.timeframe || "60"}
-          onChange={(e) =>
-            setChartConfigs((prev) => {
-              const next = [...prev];
-              next[selectedChartIdx] = {
-                ...next[selectedChartIdx],
-                timeframe: e.target.value,
-              };
-              return next;
-            })
-          }
-          style={{ height: 30, borderRadius: 6, fontSize: 13, padding: "0 8px" }}
-        >
-          {TIMEFRAMES.map((t) => (
-            <option key={t.value} value={t.value}>
-              {t.label}
-            </option>
-          ))}
-        </select>
-
-        <select
-          value={chartConfigs[selectedChartIdx]?.symbol || DEFAULT_SYMBOLS[0]}
-          onChange={(e) =>
-            setChartConfigs((prev) => {
-              const next = [...prev];
-              next[selectedChartIdx] = {
-                ...next[selectedChartIdx],
-                symbol: e.target.value,
-              };
-              return next;
-            })
-          }
-          style={{ height: 30, borderRadius: 6, maxWidth: 180, fontSize: 13, padding: "0 8px" }}
-        >
-          {DEFAULT_SYMBOLS.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-
         <button
           onClick={handleRunAnalysis}
           style={{
@@ -573,7 +496,6 @@ function TradingViewAIDashboard() {
             cursor: "pointer",
             fontWeight: 600,
             fontSize: 13,
-            marginLeft: "16px", // Moved from auto to 16px
             boxShadow: "0 4px 12px rgba(139, 92, 246, 0.3)",
             transition: "all 0.2s",
           }}
@@ -582,66 +504,27 @@ function TradingViewAIDashboard() {
         >
           📊 RSI 분석
         </button>
-
-      </div>
-
-      {/* 모바일/PC에 따라 다른 차트 영역 */}
+      </div>      {/* 모바일/PC에 따라 다른 차트 영역 */}
       {isMobile ? (
         <>
           {/* 모바일: 상단 탭 + 한 개 차트 + 좌우 스와이프 */}
-          <div
-            style={{
-              display: "flex",
-              gap: 4,
-              marginBottom: 8,
-              overflowX: "auto",
-            }}
-          >
-            {CHART_IDS.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setSelectedChartIdx(idx)}
-                style={{
-                  flexShrink: 0,
-                  padding: "6px 10px",
-                  borderRadius: 999,
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: 12,
-                  background:
-                    idx === selectedChartIdx ? "#3b82f6" : "#111827",
-                  color: idx === selectedChartIdx ? "#fff" : "#e5e7eb",
-                }}
-              >
-                #{idx + 1}{" "}
-                {chartConfigs[idx]?.symbol.replace("BINANCE:", "") ??
-                  DEFAULT_SYMBOLS[idx]}
-              </button>
+          {/* 모바일: 상단 탭 + 한 개 차트 (스와이프 제거, 탭 제거) - Wait, if I remove selection, how to show charts on mobile? 
+              The user said "remove selected chart function". 
+              On mobile, showing all 4 might be too much. 
+              But if I remove selection, I can't toggle. 
+              I will assume for now I should just show them stacked or keep the grid? 
+              Actually, the user said "remove selected chart function". 
+              If I remove the mobile tabs, I should probably just show all charts or a simple grid.
+              Let's show all charts in a column for mobile.
+           */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {CHART_IDS.map((id, idx) => (
+              <div key={id} style={{ ...chartBoxStyle }}>
+                <div id={id} style={{ width: "100%", height: "100%" }} />
+              </div>
             ))}
           </div>
 
-          <div
-            style={{ ...chartBoxStyle }}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-          >
-            <div
-              id={CHART_IDS[selectedChartIdx]}
-              style={{ width: "100%", height: "100%" }}
-            />
-          </div>
-
-          <div
-            style={{
-              marginTop: 6,
-              fontSize: 12,
-              color: "#9ca3af",
-              textAlign: "center",
-            }}
-          >
-            ← 오른쪽/왼쪽으로 스와이프해서 다른 차트로 이동할 수 있습니다.
-          </div>
         </>
       ) : (
         // PC/태블릿: 2×2 그리드
@@ -651,15 +534,8 @@ function TradingViewAIDashboard() {
               key={id}
               style={{
                 ...chartBoxStyle,
-                cursor: "pointer",
-                outline:
-                  idx === selectedChartIdx
-                    ? "2px solid #60a5fa"
-                    : "none",
                 position: "relative",
               }}
-              onClick={() => setSelectedChartIdx(idx)}
-              title={`차트 선택: ${idx + 1}`}
             >
               <div id={id} style={{ width: "100%", height: "100%" }} />
             </div>
@@ -748,9 +624,9 @@ function TradingViewAIDashboard() {
             </div>
 
             <RsiGptFrontOnlyDemo
-              activeSymbol={chartConfigs[selectedChartIdx]?.symbol?.replace("BINANCE:", "") || "BTCUSDT"}
+              activeSymbol={chartConfigs[0]?.symbol?.replace("BINANCE:", "") || "BTCUSDT"}
               activeTimeframe={(() => {
-                const tf = chartConfigs[selectedChartIdx]?.timeframe || "60";
+                const tf = chartConfigs[0]?.timeframe || "60";
                 if (tf === "1") return "1m";
                 if (tf === "15") return "15m";
                 if (tf === "60") return "1h";
