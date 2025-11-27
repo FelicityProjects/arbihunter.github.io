@@ -9,9 +9,13 @@
 import React, { useState, useEffect } from "react";
 
 // ====== 환경별 API 베이스 URL 설정 ======
-const API_BASE =
-  import.meta?.env?.VITE_API_BASE_URL ||
-  "https://fastapi-rsi-c3h0eshmc9g5ffff.koreasouth-01.azurewebsites.net";
+const isLocal =
+  typeof window !== "undefined" &&
+  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+
+const API_BASE = isLocal
+  ? "http://127.0.0.1:8000"
+  : "https://fastapi-rsi-c3h0eshmc9g5ffff.koreasouth-01.azurewebsites.net";
 
 // 화면에 보여줄 타임프레임 목록
 const TIMEFRAME_OPTIONS = [
@@ -25,10 +29,29 @@ const TIMEFRAME_OPTIONS = [
   "1d",
 ];
 
+// ====== 신호 강도별 색상 매핑 함수 ======
+function getSignalColor(signal) {
+  if (!signal) return "#9ca3af"; // Gray
+
+  // 1. 매수 (Buy) 계열
+  if (signal.includes("매수") || signal.includes("BUY")) {
+    if (signal.includes("강력")) return "#15803d"; // Deep Green (Strong)
+    if (signal.includes("단기") || signal.includes("관점")) return "#4ade80"; // Light Green (Weak)
+    return "#16a34a"; // Standard Green
+  }
+
+  // 2. 매도 (Sell) 계열
+  if (signal.includes("매도") || signal.includes("SELL")) {
+    if (signal.includes("강력")) return "#b91c1c"; // Deep Red (Strong)
+    if (signal.includes("단기") || signal.includes("관점")) return "#f87171"; // Light Red (Weak)
+    return "#dc2626"; // Standard Red
+  }
+
+  return "#9ca3af"; // Neutral
+}
+
 // ❗ 실제 FastAPI 서비스 호출 (1) : 최신 RSI 한 개
 async function fetchLatestRsiFromServer(symbol, timeframe) {
-
-
   const url =
     `${API_BASE}/api/indicators/latest-rsi` +
     `?symbol=${encodeURIComponent(symbol)}` +
@@ -47,6 +70,12 @@ async function fetchLatestRsiFromServer(symbol, timeframe) {
   const data = await res.json();
   return {
     rsi: data.rsi,
+    ema_short: data.ema_short,
+    ema_long: data.ema_long,
+    bb_upper: data.bb_upper,
+    bb_lower: data.bb_lower,
+    divergence: data.divergence,
+    signal: data.signal,
     updatedAt: data.updated_at || data.updatedAt,
   };
 }
@@ -110,12 +139,6 @@ const RsiGptFrontOnlyDemo = ({ activeSymbol, activeTimeframe }) => {
   }, [activeSymbol]);
 
   useEffect(() => {
-    // Map TradingView timeframe codes to API timeframe codes if necessary
-    // Assuming API accepts "1M", "60" (for 1h?), "D" (for 1d?)
-    // Wait, TIMEFRAME_OPTIONS are "1m", "5m", ... "1d", "1M"
-    // But TradingView passes "60", "240", "D", "1M"
-    // We need a mapping function or logic here.
-    // Let's implement a simple mapper.
     refreshAllTimeframesAndCandles();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [symbol, selectedTf]);
@@ -445,6 +468,23 @@ const RsiGptFrontOnlyDemo = ({ activeSymbol, activeTimeframe }) => {
                       ? "불러오는 중..."
                       : "데이터 없음"}
                 </div>
+                {/* Signal Badge */}
+                {info?.signal && info.signal !== "관망 (중립)" && info.signal !== "N/A" && (
+                  <div
+                    style={{
+                      marginTop: 6,
+                      fontSize: 10,
+                      fontWeight: 700,
+                      color: "#fff",
+                      background: getSignalColor(info.signal),
+                      padding: "2px 6px",
+                      borderRadius: 4,
+                      display: "inline-block",
+                    }}
+                  >
+                    {info.signal}
+                  </div>
+                )}
               </div>
             );
           })}
@@ -486,7 +526,7 @@ const RsiGptFrontOnlyDemo = ({ activeSymbol, activeTimeframe }) => {
                 color: "#6b7280",
               }}
             >
-              시간 · 종가 · <strong>등락(직전 캔들 대비)</strong> · RSI · 고가 · 저가 · 거래량
+              시간 · 종가 · <strong>등락</strong> · RSI · <strong>EMA(50/200) · 볼린저 · 신호</strong> · 거래량
               등을 확인할 수 있습니다.
             </div>
           </div>
@@ -563,7 +603,7 @@ const RsiGptFrontOnlyDemo = ({ activeSymbol, activeTimeframe }) => {
                     color: "#4b5563",
                   }}
                 >
-                  고가
+                  EMA(50)
                 </th>
                 <th
                   style={{
@@ -573,7 +613,27 @@ const RsiGptFrontOnlyDemo = ({ activeSymbol, activeTimeframe }) => {
                     color: "#4b5563",
                   }}
                 >
-                  저가
+                  EMA(200)
+                </th>
+                <th
+                  style={{
+                    textAlign: "right",
+                    padding: "6px 8px",
+                    fontWeight: 600,
+                    color: "#4b5563",
+                  }}
+                >
+                  볼린저(20,2)
+                </th>
+                <th
+                  style={{
+                    textAlign: "center",
+                    padding: "6px 8px",
+                    fontWeight: 600,
+                    color: "#4b5563",
+                  }}
+                >
+                  신호
                 </th>
                 <th
                   style={{
@@ -682,17 +742,47 @@ const RsiGptFrontOnlyDemo = ({ activeSymbol, activeTimeframe }) => {
                         style={{
                           padding: "5px 8px",
                           textAlign: "right",
+                          color: "#4b5563",
                         }}
                       >
-                        {Number(candle.high).toFixed(2)}
+                        {candle.ema_short ? Number(candle.ema_short).toFixed(2) : "-"}
                       </td>
                       <td
                         style={{
                           padding: "5px 8px",
                           textAlign: "right",
+                          color: "#4b5563",
                         }}
                       >
-                        {Number(candle.low).toFixed(2)}
+                        {candle.ema_long ? Number(candle.ema_long).toFixed(2) : "-"}
+                      </td>
+                      <td
+                        style={{
+                          padding: "5px 8px",
+                          textAlign: "right",
+                          color: "#4b5563",
+                          fontSize: 10,
+                        }}
+                      >
+                        {candle.bb_upper && candle.bb_lower ? (
+                          <>
+                            <div style={{ color: "#ef4444" }}>{Number(candle.bb_upper).toFixed(2)}</div>
+                            <div style={{ color: "#3b82f6" }}>{Number(candle.bb_lower).toFixed(2)}</div>
+                          </>
+                        ) : "-"}
+                      </td>
+                      <td
+                        style={{
+                          padding: "5px 8px",
+                          textAlign: "center",
+                          fontWeight: 700,
+                        }}
+                      >
+                        {(() => {
+                          const sig = candle.signal || "-";
+                          const color = getSignalColor(sig);
+                          return <span style={{ color, fontSize: 11 }}>{sig}</span>;
+                        })()}
                       </td>
                       <td
                         style={{
@@ -711,7 +801,7 @@ const RsiGptFrontOnlyDemo = ({ activeSymbol, activeTimeframe }) => {
               ) : (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={9}
                     style={{
                       padding: "10px 8px",
                       textAlign: "center",
@@ -729,34 +819,24 @@ const RsiGptFrontOnlyDemo = ({ activeSymbol, activeTimeframe }) => {
         </div>
       </div>
 
-      <div
-        style={{
-          marginTop: 10,
-          fontSize: 11,
-          color: "#9ca3af",
-          lineHeight: 1.4,
-        }}
-      >
-        🔎 Tip: FastAPI 서버(main.py)의 엔드포인트 주소만 맞다면
-        이 컴포넌트는 그대로 백엔드와 연동해서 사용할 수 있습니다.
-        <br />
-        비트코인/이더리움 심볼과 타임프레임을 변경하면 자동으로 서비스 호출이 일어나며,
-        상단의 <strong>“서비스 호출 중...”</strong> 배지와
-        하단 <strong>등락(상방/하방)</strong> 컬럼으로 흐름을 한눈에 볼 수 있습니다.
-      </div>
-
-      {/* 로딩 오버레이 */}
-      {isLoading && (
+      {/* 로딩 오버레이 (최초 로딩 시에만 보여줘도 되고, isLoading일 때마다 보여줘도 됨) */}
+      {/* 여기서는 isLoading && !recentCandles.length 일 때만 보여주거나, 
+          혹은 상단 배지로 대체했으므로 생략 가능. 
+          하지만 '서비스 연결 중' 느낌을 위해 남겨둠 */}
+      {isLoading && recentCandles.length === 0 && (
         <div
           style={{
             position: "absolute",
-            inset: 0,
-            backgroundColor: "rgba(255, 255, 255, 0.85)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 50,
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(255,255,255,0.8)",
             borderRadius: 16,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 10,
             backdropFilter: "blur(2px)",
           }}
         >

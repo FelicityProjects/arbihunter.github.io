@@ -30,35 +30,45 @@ const TODO_DATA = [
   {
     id: 1,
     status: 'done',
-    title: '프로젝트 초기 설정 및 4분할 차트 구현',
-    desc: '✅ React 프로젝트 생성\n✅ TradingView 위젯 연동\n✅ 4분할 그리드 레이아웃 구현\n✅ GitHub Pages 배포 환경 구성 완료'
+    title: '웹 애플리케이션 초기 아키텍처 설계 및 4분할 차트 시스템 구현',
+    desc: '✅ React 18 기반 SPA(Single Page Application) 프로젝트 초기화 및 디렉토리 구조 설계\n✅ TradingView Advanced Real-Time Chart Widget 연동 및 커스텀 옵션 적용\n✅ CSS Grid 활용 반응형 4분할 차트 레이아웃 (Desktop/Mobile 최적화)\n✅ GitHub Pages 정적 호스팅 환경 구축 및 배포 자동화 기반 마련'
   },
   {
     id: 2,
     status: 'done',
-    title: 'RSI 분석 팝업 화면 구현',
-    desc: '✅ RSI 분석 모달 UI 구현\n✅ 다중 타임프레임 RSI 그리드 표시\n✅ 최근 20개 캔들 데이터 테이블 시각화\n✅ 선택된 차트와 데이터 동기화 구현'
+    title: '다중 타임프레임 RSI 분석 모달 및 데이터 시각화 UI 개발',
+    desc: '✅ React Portal 기반의 오버레이 RSI 분석 모달 컴포넌트 구현\n✅ 8개 타임프레임(1m~1d) RSI 지표 동시 모니터링을 위한 Grid 시스템 구축\n✅ 최근 20개 캔들 데이터(OHLCV, 지표) 정밀 분석을 위한 인터랙티브 테이블 구현\n✅ 선택된 차트 심볼(Symbol)과 모달 데이터 간의 실시간 동기화 로직 적용'
   },
   {
     id: 3,
     status: 'done',
-    title: 'RSI 데이터 조회 API 연동',
-    desc: '✅ FastAPI 기반 백엔드 서버 구축\n✅ Binance Spot API 연동 (OHLC 데이터)\n✅ RSI 지표 계산 로직 구현 (EMA 방식)\n✅ 프론트엔드 연동을 위한 CORS 및 엔드포인트 설정'
+    title: 'FastAPI 기반 기술적 지표 산출 백엔드 서버 구축',
+    desc: '✅ Python FastAPI 프레임워크를 이용한 고성능 RESTful API 서버 개발\n✅ Binance Spot API 연동을 통한 실시간 OHLCV 시장 데이터 수집 파이프라인 구축\n✅ Pandas/NumPy 활용 RSI, EMA(50/200), 볼린저 밴드 등 기술적 지표 연산 로직 구현\n✅ CORS(Cross-Origin Resource Sharing) 정책 설정 및 환경별(Local/Prod) 엔드포인트 분기 처리'
   },
   {
     id: 4,
     status: 'done',
-    title: 'GitHub Actions 배포 자동화',
-    desc: '✅ Microsoft Azure Service 연동\n✅ GitHub Actions Workflow 설정\n✅ CI/CD 배포 파이프라인 구축 완료'
+    title: 'GitHub Actions 기반 CI/CD 파이프라인 및 배포 자동화',
+    desc: '✅ GitHub Actions Workflow 작성을 통한 빌드 및 배포 프로세스 자동화\n✅ Microsoft Azure Web App Service 연동 및 배포 프로필(Publish Profile) 보안 설정\n✅ Main 브랜치 푸시 시 자동 빌드/배포 트리거 설정으로 지속적 통합/배포 환경 구축\n✅ 빌드 상태 모니터링 및 에러 핸들링 프로세스 정립'
   },
   {
     id: 5,
     status: 'done',
-    title: 'Azure AppService 환경 설정',
-    desc: '✅ Azure Web App 리소스 생성\n✅ Node.js 18 LTS 런타임 설정\n✅ 배포 프로필(Publish Profile) 연동 완료'
+    title: 'Azure 클라우드 인프라 프로비저닝 및 런타임 환경 최적화',
+    desc: '✅ Azure App Service (Linux Plan) 리소스 그룹 생성 및 인스턴스 프로비저닝\n✅ Python 3.9+ 런타임 환경 구성 및 의존성 패키지(requirements.txt) 관리 전략 수립\n✅ 애플리케이션 성능 최적화를 위한 Gunicorn WSGI 서버 설정 및 워커 튜닝\n✅ 프로덕션 환경 변수 관리 및 로깅 시스템 구성'
   },
-  { id: 6, status: 'planned', title: 'RSI 지표 매수/매도 알고리즘', desc: '구현 예정...' },
-  { id: 7, status: 'planned', title: '생성형 AI 투자 전략 학습', desc: '구현 예정...' },
+  {
+    id: 6,
+    status: 'done',
+    title: 'RSI 및 EMA 기반 복합 추세 추종 매매 알고리즘 구현',
+    desc: '✅ **전략 개요**: RSI(14) + EMA(200) + 볼린저 밴드(20,2) + 다이버전스를 결합한 고승률 매매 전략\n✅ **매수 시그널**: 가격 > 200 EMA (상승 추세) AND (RSI < 30 과매도 OR 상승 다이버전스 발생 OR 볼린저 하단 터치)\n✅ **매도 시그널**: 가격 < 200 EMA (하락 추세) AND (RSI > 70 과매수 OR 하락 다이버전스 발생 OR 볼린저 상단 터치)\n✅ **신호 강도 시각화**: 강력(Strong)/일반(Normal)/단기(Weak) 3단계 신호 강도 구분 및 직관적 컬러 코딩(Deep/Light Green & Red) 적용'
+  },
+  {
+    id: 7,
+    status: 'planned',
+    title: 'LLM 기반 생성형 AI 투자 전략 어드바이저 개발 (예정)',
+    desc: '👉 OpenAI GPT-4o API 연동을 통한 시장 데이터 심층 분석 및 투자 인사이트 도출\n👉 뉴스 감성 분석(Sentiment Analysis) 및 거시 경제 지표를 결합한 멀티모달 분석 모델 도입 예정\n👉 축적된 캔들 데이터와 매수/매도 기록을 재분석하여 로직을 지속적으로 개선하는 자가 학습 메커니즘 구현\n👉 사용자 대화형 투자 어드바이저 챗봇 인터페이스 구현 계획'
+  },
 ];
 
 function TradingViewAIDashboard() {
@@ -261,379 +271,561 @@ function TradingViewAIDashboard() {
 
       if (scriptAppended) {
         const s = document.getElementById(scriptId);
-        if (s && s.parentNode) s.parentNode.removeChild(s);
+        if (s) s.remove();
       }
     };
   }, [chartConfigs]);
 
-  const handleRunAnalysis = () => {
-    setError(null);
+  // 차트 설정 변경 핸들러
+  const handleSymbolChange = (idx, newSymbol) => {
+    setChartConfigs((prev) => {
+      const next = [...prev];
+      next[idx] = { ...next[idx], symbol: newSymbol };
+      return next;
+    });
+  };
+
+  const handleTimeframeChange = (idx, newTf) => {
+    setChartConfigs((prev) => {
+      const next = [...prev];
+      next[idx] = { ...next[idx], timeframe: newTf };
+      return next;
+    });
+  };
+
+  // RSI 분석 버튼 클릭
+  const handleRsiAnalysis = async () => {
+    // 첫 번째 차트의 심볼을 기본값으로 사용
+    const targetSymbol = chartConfigs[0]?.symbol?.replace("BINANCE:", "") || "BTCUSDT";
+    // RSI 분석 모달 열기
     setShowRsiView(true);
-  };
-
-
-
-  const chartBoxStyle = {
-    width: "100%",
-    height: isMobile ? "260px" : "360px",
-    border: "1px solid #1f2937",
-    borderRadius: "8px",
-    overflow: "hidden",
-    background: "#020617",
-  };
-
-  const toolbarStyle = {
-    marginBottom: 12,
-    display: "flex",
-    gap: 8,
-    alignItems: "center",
-    flexWrap: "wrap",
-  };
-
-  const labelStyle = { fontSize: 14, color: "#e5e7eb" };
-
-  // PC 레이아웃용 grid
-  const gridStyleDesktop = {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, 1fr)",
-    gap: "12px",
-    alignItems: "stretch",
   };
 
   return (
     <div
       style={{
-        padding: 12,
-        background: "#020617",
-        minHeight: "100dvh",
-        color: "#e5e7eb",
-        boxSizing: "border-box",
+        width: "100%",
+        minHeight: "100vh",
+        background: "#0f172a",
+        color: "#e2e8f0",
+        fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
-
-      {/* 3-Column To-Do List Section */}
-      <div style={{ marginBottom: 24 }}>
-        <h3 style={{ margin: "0 0 12px", fontSize: 18, fontWeight: 700, color: "#e5e7eb" }}>
-          🚀 Project To-Do List (2025.11.27 ~ )
-        </h3>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
-
-          {/* Column 1: Completed */}
-          <div style={{ background: "#1f2937", borderRadius: 8, padding: 12, border: "1px solid #374151" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, borderBottom: "1px solid #374151", paddingBottom: 8 }}>
-              <h4 style={{ margin: 0, fontSize: 14, color: "#34d399" }}>
-                ✅ 완료된 작업
-              </h4>
-              <div style={{ display: "flex", gap: 4 }}>
-                <button
-                  onClick={() => handleAddTodo('done')}
-                  style={{ background: "#374151", border: "none", color: "#fff", borderRadius: 4, cursor: "pointer", padding: "2px 6px", fontSize: 12 }}
-                  title="추가"
-                >
-                  +
-                </button>
-                <button
-                  onClick={() => handleDeleteTodo('done')}
-                  style={{ background: "#374151", border: "none", color: "#fca5a5", borderRadius: 4, cursor: "pointer", padding: "2px 6px", fontSize: 12 }}
-                  title="삭제"
-                >
-                  -
-                </button>
-              </div>
-            </div>
-            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-              {todos.filter(item => item.status === 'done').map(item => (
-                <li
-                  key={item.id}
-                  onClick={() => setSelectedTodo(item)}
-                  onDoubleClick={() => handleEditClick(item)}
-                  style={{
-                    padding: "10px",
-                    marginBottom: 8,
-                    borderRadius: 6,
-                    background: selectedTodo?.id === item.id ? "#374151" : "#2d3748",
-                    border: selectedTodo?.id === item.id ? "1px solid #3b82f6" : "1px solid #4b5563",
-                    cursor: "pointer",
-                    fontSize: 13,
-                    color: "#e5e7eb",
-                    transition: "all 0.2s",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    boxShadow: "0 1px 2px rgba(0,0,0,0.2)"
-                  }}
-                  onMouseOver={(e) => {
-                    if (selectedTodo?.id !== item.id) {
-                      e.currentTarget.style.background = "#4b5563";
-                      e.currentTarget.style.transform = "translateY(-1px)";
-                    }
-                  }}
-                  onMouseOut={(e) => {
-                    if (selectedTodo?.id !== item.id) {
-                      e.currentTarget.style.background = "#2d3748";
-                      e.currentTarget.style.transform = "translateY(0)";
-                    }
-                  }}
-                >
-                  <span style={{ color: "#34d399", fontSize: 10 }}>●</span>
-                  {item.title}
-                </li>
-              ))}
-            </ul>
+      {/* 상단 헤더 */}
+      <header
+        style={{
+          height: 60,
+          background: "#1e293b",
+          borderBottom: "1px solid #334155",
+          display: "flex",
+          alignItems: "center",
+          padding: "0 20px",
+          justifyContent: "space-between",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              background: "linear-gradient(135deg, #3b82f6, #8b5cf6)",
+              borderRadius: 8,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontWeight: "bold",
+              color: "#fff",
+            }}
+          >
+            AI
           </div>
-
-          {/* Column 2: Planned */}
-          <div style={{ background: "#1f2937", borderRadius: 8, padding: 12, border: "1px solid #374151" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, borderBottom: "1px solid #374151", paddingBottom: 8 }}>
-              <h4 style={{ margin: 0, fontSize: 14, color: "#60a5fa" }}>
-                📅 계획된 작업
-              </h4>
-              <div style={{ display: "flex", gap: 4 }}>
-                <button
-                  onClick={() => handleAddTodo('planned')}
-                  style={{ background: "#374151", border: "none", color: "#fff", borderRadius: 4, cursor: "pointer", padding: "2px 6px", fontSize: 12 }}
-                  title="추가"
-                >
-                  +
-                </button>
-                <button
-                  onClick={() => handleDeleteTodo('planned')}
-                  style={{ background: "#374151", border: "none", color: "#fca5a5", borderRadius: 4, cursor: "pointer", padding: "2px 6px", fontSize: 12 }}
-                  title="삭제"
-                >
-                  -
-                </button>
-              </div>
-            </div>
-            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-              {todos.filter(item => item.status === 'planned').map(item => (
-                <li
-                  key={item.id}
-                  onClick={() => setSelectedTodo(item)}
-                  onDoubleClick={() => handleEditClick(item)}
-                  style={{
-                    padding: "10px",
-                    marginBottom: 8,
-                    borderRadius: 6,
-                    background: selectedTodo?.id === item.id ? "#374151" : "#2d3748",
-                    border: selectedTodo?.id === item.id ? "1px solid #3b82f6" : "1px solid #4b5563",
-                    cursor: "pointer",
-                    fontSize: 13,
-                    color: "#e5e7eb",
-                    transition: "all 0.2s",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    boxShadow: "0 1px 2px rgba(0,0,0,0.2)"
-                  }}
-                  onMouseOver={(e) => {
-                    if (selectedTodo?.id !== item.id) {
-                      e.currentTarget.style.background = "#4b5563";
-                      e.currentTarget.style.transform = "translateY(-1px)";
-                    }
-                  }}
-                  onMouseOut={(e) => {
-                    if (selectedTodo?.id !== item.id) {
-                      e.currentTarget.style.background = "#2d3748";
-                      e.currentTarget.style.transform = "translateY(0)";
-                    }
-                  }}
-                >
-                  <span style={{ color: "#60a5fa", fontSize: 10 }}>●</span>
-                  {item.title}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Column 3: Details */}
-          <div style={{ background: "#111827", borderRadius: 8, padding: 16, border: "1px solid #374151" }}>
-            <h4 style={{ margin: "0 0 12px", fontSize: 14, color: "#f3f4f6", borderBottom: "1px solid #374151", paddingBottom: 8 }}>
-              📝 상세 내용
-            </h4>
-            {selectedTodo ? (
-              <div>
-                <div style={{ fontSize: 15, fontWeight: 600, color: "#fff", marginBottom: 8 }}>
-                  {selectedTodo.title}
-                </div>
-                <div style={{ fontSize: 12, color: selectedTodo.status === 'done' ? "#34d399" : "#60a5fa", marginBottom: 12 }}>
-                  {selectedTodo.status === 'done' ? "완료됨" : "계획됨"}
-                </div>
-                <div style={{
-                  fontSize: 13,
-                  color: "#d1d5db",
-                  lineHeight: 1.6,
-                  whiteSpace: "pre-wrap", // Enable line breaks
-                  background: "#1f2937",
-                  padding: "12px",
-                  borderRadius: "6px",
-                  border: "1px solid #374151"
-                }}>
-                  {selectedTodo.desc}
-                </div>
-              </div>
-            ) : (
-              <div style={{ fontSize: 13, color: "#6b7280", textAlign: "center", marginTop: 20 }}>
-                좌측 리스트에서 항목을 선택하여<br />상세 내용을 확인하세요.
-              </div>
-            )}
-          </div>
-
+          <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>
+            TradingView AI Dashboard
+          </h1>
+          <span style={{ fontSize: 14, color: "#94a3b8", marginLeft: 8 }}>
+            - 실시간 4분할 차트 및 AI 기반 투자 전략 대시보드
+          </span>
         </div>
-      </div>
 
-      {/* 툴바 */}
-      <div style={toolbarStyle}>
-        <button
-          onClick={handleRunAnalysis}
+        <div style={{ display: "flex", gap: 12 }}>
+          <button
+            onClick={handleRsiAnalysis}
+            style={{
+              background: "#3b82f6",
+              color: "#fff",
+              border: "none",
+              padding: "8px 16px",
+              borderRadius: 6,
+              fontWeight: 600,
+              cursor: "pointer",
+              fontSize: 14,
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <span>📊</span> RSI 분석
+          </button>
+        </div>
+      </header>
+
+      {/* 메인 컨텐츠: 4분할 차트 + To-Do List */}
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: isMobile ? "column" : "row",
+          overflow: "hidden",
+        }}
+      >
+        {/* 우측(이제 좌측/상단): To-Do List 패널 */}
+        <div
           style={{
-            height: 36,
-            padding: "0 16px",
-            borderRadius: 6,
-            border: "none",
-            background: "linear-gradient(135deg, #8b5cf6, #ec4899)", // Violet to Pink gradient
-            color: "#fff",
-            cursor: "pointer",
-            fontWeight: 600,
-            fontSize: 13,
-            boxShadow: "0 4px 12px rgba(139, 92, 246, 0.3)",
-            transition: "all 0.2s",
+            width: isMobile ? "100%" : 380,
+            background: "#1e293b",
+            borderRight: isMobile ? "none" : "1px solid #334155",
+            borderBottom: isMobile ? "1px solid #334155" : "none",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
           }}
-          onMouseOver={(e) => (e.currentTarget.style.transform = "translateY(-1px)")}
-          onMouseOut={(e) => (e.currentTarget.style.transform = "translateY(0)")}
         >
-          📊 RSI 분석
-        </button>
-      </div>      {/* 모바일/PC에 따라 다른 차트 영역 */}
-      {isMobile ? (
-        <>
-          {/* 모바일: 상단 탭 + 한 개 차트 + 좌우 스와이프 */}
-          {/* 모바일: 상단 탭 + 한 개 차트 (스와이프 제거, 탭 제거) - Wait, if I remove selection, how to show charts on mobile? 
-              The user said "remove selected chart function". 
-              On mobile, showing all 4 might be too much. 
-              But if I remove selection, I can't toggle. 
-              I will assume for now I should just show them stacked or keep the grid? 
-              Actually, the user said "remove selected chart function". 
-              If I remove the mobile tabs, I should probably just show all charts or a simple grid.
-              Let's show all charts in a column for mobile.
-           */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {CHART_IDS.map((id, idx) => (
-              <div key={id} style={{ ...chartBoxStyle }}>
-                <div id={id} style={{ width: "100%", height: "100%" }} />
-              </div>
-            ))}
+          <div
+            style={{
+              padding: 16,
+              borderBottom: "1px solid #334155",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              background: "#0f172a",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>
+                Project Roadmap
+              </h2>
+              <span style={{ fontSize: 12, color: "#60a5fa", fontWeight: 500 }}>
+                * 타이틀 클릭 시 상세 내용 확인
+              </span>
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                onClick={() => handleAddTodo("planned")}
+                style={{
+                  background: "#334155",
+                  border: "none",
+                  color: "#94a3b8",
+                  width: 28,
+                  height: 28,
+                  borderRadius: 4,
+                  cursor: "pointer",
+                  fontSize: 16,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                title="Add Planned Task"
+              >
+                +
+              </button>
+            </div>
           </div>
 
-        </>
-      ) : (
-        // PC/태블릿: 2×2 그리드
-        <div style={gridStyleDesktop}>
+          <div style={{ flex: 1, overflowY: "auto", padding: 16 }}>
+            {/* Planned Section */}
+            <div style={{ marginBottom: 24 }}>
+              <h3
+                style={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: "#f59e0b",
+                  marginBottom: 12,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                <span
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    background: "#f59e0b",
+                  }}
+                />
+                In Progress / Planned
+              </h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {todos
+                  .filter((t) => t.status === "planned")
+                  .map((todo) => (
+                    <div
+                      key={todo.id}
+                      onClick={() => setSelectedTodo(todo)}
+                      style={{
+                        background:
+                          selectedTodo?.id === todo.id ? "#334155" : "#0f172a",
+                        padding: 12,
+                        borderRadius: 8,
+                        border:
+                          selectedTodo?.id === todo.id
+                            ? "1px solid #f59e0b"
+                            : "1px solid #334155",
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 14,
+                          fontWeight: 600,
+                          marginBottom: 4,
+                          color: "#f1f5f9",
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        {todo.title}
+                      </div>
+                      {selectedTodo?.id === todo.id && (
+                        <div
+                          style={{
+                            marginTop: 8,
+                            fontSize: 13,
+                            color: "#cbd5e1",
+                            lineHeight: 1.6,
+                            whiteSpace: "pre-wrap",
+                            background: "#1e293b",
+                            padding: "8px 10px",
+                            borderRadius: 6,
+                            border: "1px solid #475569",
+                          }}
+                        >
+                          {todo.desc}
+                        </div>
+                      )}
+                      {selectedTodo?.id === todo.id && (
+                        <div
+                          style={{
+                            marginTop: 10,
+                            display: "flex",
+                            justifyContent: "flex-end",
+                            gap: 8,
+                          }}
+                        >
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditClick(todo);
+                            }}
+                            style={{
+                              fontSize: 11,
+                              padding: "4px 8px",
+                              background: "#3b82f6",
+                              border: "none",
+                              borderRadius: 4,
+                              color: "#fff",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteTodo("planned");
+                            }}
+                            style={{
+                              fontSize: 11,
+                              padding: "4px 8px",
+                              background: "#ef4444",
+                              border: "none",
+                              borderRadius: 4,
+                              color: "#fff",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            {/* Done Section */}
+            <div>
+              <h3
+                style={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: "#10b981",
+                  marginBottom: 12,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                <span
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    background: "#10b981",
+                  }}
+                />
+                Completed
+              </h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {todos
+                  .filter((t) => t.status === "done")
+                  .map((todo) => (
+                    <div
+                      key={todo.id}
+                      onClick={() => setSelectedTodo(todo)}
+                      style={{
+                        background:
+                          selectedTodo?.id === todo.id ? "#334155" : "#0f172a",
+                        padding: 12,
+                        borderRadius: 8,
+                        border:
+                          selectedTodo?.id === todo.id
+                            ? "1px solid #3b82f6"
+                            : "1px solid #334155",
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 14,
+                          fontWeight: 600,
+                          marginBottom: 4,
+                          color: "#f1f5f9",
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        {todo.title}
+                      </div>
+                      {selectedTodo?.id === todo.id && (
+                        <div
+                          style={{
+                            marginTop: 8,
+                            fontSize: 13,
+                            color: "#cbd5e1",
+                            lineHeight: 1.6,
+                            whiteSpace: "pre-wrap",
+                            background: "#1e293b",
+                            padding: "8px 10px",
+                            borderRadius: 6,
+                            border: "1px solid #475569",
+                          }}
+                        >
+                          {todo.desc}
+                        </div>
+                      )}
+                      {selectedTodo?.id === todo.id && (
+                        <div
+                          style={{
+                            marginTop: 10,
+                            display: "flex",
+                            justifyContent: "flex-end",
+                            gap: 8,
+                          }}
+                        >
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditClick(todo);
+                            }}
+                            style={{
+                              fontSize: 11,
+                              padding: "4px 8px",
+                              background: "#3b82f6",
+                              border: "none",
+                              borderRadius: 4,
+                              color: "#fff",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteTodo("done");
+                            }}
+                            style={{
+                              fontSize: 11,
+                              padding: "4px 8px",
+                              background: "#ef4444",
+                              border: "none",
+                              borderRadius: 4,
+                              color: "#fff",
+                              cursor: "pointer",
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 좌측(이제 우측/하단): 4분할 차트 영역 */}
+        <div
+          style={{
+            flex: 1,
+            padding: 10,
+            overflowY: "auto",
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+            gridTemplateRows: isMobile ? "repeat(4, 400px)" : "1fr 1fr",
+            gap: 10,
+          }}
+        >
           {CHART_IDS.map((id, idx) => (
             <div
               key={id}
               style={{
-                ...chartBoxStyle,
+                background: "#1e293b",
+                borderRadius: 12,
+                border: "1px solid #334155",
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
                 position: "relative",
               }}
             >
-              <div id={id} style={{ width: "100%", height: "100%" }} />
+              {/* 차트 상단 툴바 */}
+              <div
+                style={{
+                  height: 40,
+                  background: "#0f172a",
+                  borderBottom: "1px solid #334155",
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "0 10px",
+                  justifyContent: "space-between",
+                }}
+              >
+                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 700,
+                      color: "#94a3b8",
+                      marginRight: 4,
+                    }}
+                  >
+                    CHART {idx + 1}
+                  </span>
+                  <select
+                    value={chartConfigs[idx].symbol}
+                    onChange={(e) => handleSymbolChange(idx, e.target.value)}
+                    style={{
+                      background: "#334155",
+                      color: "#f1f5f9",
+                      border: "none",
+                      borderRadius: 4,
+                      padding: "4px 8px",
+                      fontSize: 12,
+                      cursor: "pointer",
+                    }}
+                  >
+                    {DEFAULT_SYMBOLS.map((sym) => (
+                      <option key={sym} value={sym}>
+                        {sym.split(":")[1]}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={chartConfigs[idx].timeframe}
+                    onChange={(e) => handleTimeframeChange(idx, e.target.value)}
+                    style={{
+                      background: "#334155",
+                      color: "#f1f5f9",
+                      border: "none",
+                      borderRadius: 4,
+                      padding: "4px 8px",
+                      fontSize: 12,
+                      cursor: "pointer",
+                    }}
+                  >
+                    {TIMEFRAMES.map((tf) => (
+                      <option key={tf.value} value={tf.value}>
+                        {tf.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* TradingView 위젯 컨테이너 */}
+              <div id={id} style={{ flex: 1, width: "100%", height: "100%" }} />
             </div>
           ))}
         </div>
-      )}
-
-      {/* 에러 / 분석 결과 */}
-      <div style={{ marginTop: 16 }}>
-        {error && (
-          <div style={{ color: "#fca5a5", marginBottom: 8 }}>{error}</div>
-        )}
-
-        {analysis && (
-          <div
-            style={{
-              border: "1px solid #1f2937",
-              borderRadius: 8,
-              padding: 12,
-              background: "#020617",
-              fontSize: 13,
-            }}
-          >
-            {/* 필요시 기존 analysis 렌더링 로직 재사용 */}
-          </div>
-        )}
       </div>
 
-      {/* RSI 분석 모달 */}
+      {/* RSI 분석 모달 (React Portal or Conditional Rendering) */}
       {showRsiView && (
         <div
           style={{
             position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0,0,0,0.5)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(0,0,0,0.7)",
             zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 20,
           }}
+          onClick={() => setShowRsiView(false)}
         >
           <div
             style={{
-              position: "relative",
               width: "100%",
               maxWidth: 1000,
-              height: "100%",
-              maxHeight: "100dvh",
-              backgroundColor: "#fff",
-              borderRadius: 0,
-              overflow: "auto",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              background: "#fff",
+              borderRadius: 16,
             }}
+            onClick={(e) => e.stopPropagation()}
           >
-            <div
-              style={{
-                position: "sticky",
-                top: 0,
-                zIndex: 100,
-                display: "flex",
-                justifyContent: "flex-end",
-                padding: "12px",
-                background: "#fff",
-                borderBottom: "1px solid #f3f4f6",
-              }}
-            >
+            {/* 닫기 버튼 */}
+            <div style={{ display: "flex", justifyContent: "flex-end", padding: 10 }}>
               <button
                 onClick={() => setShowRsiView(false)}
                 style={{
+                  background: "transparent",
                   border: "none",
-                  borderRadius: 8,
-                  padding: "8px 16px",
-                  fontSize: 14,
-                  fontWeight: 600,
+                  fontSize: 24,
                   cursor: "pointer",
-                  background: "#ef4444",
-                  color: "#ffffff",
-                  boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
-                  transition: "background 0.2s",
+                  color: "#333",
                 }}
-                onMouseOver={(e) => (e.currentTarget.style.background = "#dc2626")}
-                onMouseOut={(e) => (e.currentTarget.style.background = "#ef4444")}
               >
-                닫기
+                &times;
               </button>
             </div>
-
+            {/* RSI 컴포넌트 */}
             <RsiGptFrontOnlyDemo
               activeSymbol={chartConfigs[0]?.symbol?.replace("BINANCE:", "") || "BTCUSDT"}
-              activeTimeframe={(() => {
-                const tf = chartConfigs[0]?.timeframe || "60";
-                if (tf === "1") return "1m";
-                if (tf === "15") return "15m";
-                if (tf === "60") return "1h";
-                if (tf === "240") return "4h";
-                if (tf === "D") return "1d";
-                return "1h"; // Default fallback
-              })()}
+              activeTimeframe={chartConfigs[0]?.timeframe === "D" ? "1d" : "1h"}
             />
           </div>
         </div>
@@ -644,97 +836,97 @@ function TradingViewAIDashboard() {
         <div
           style={{
             position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0,0,0,0.7)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(0,0,0,0.7)",
             zIndex: 10000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
+          onClick={() => setIsEditModalOpen(false)}
         >
           <div
             style={{
-              background: "#1f2937",
+              background: "#1e293b",
               padding: 24,
               borderRadius: 12,
-              width: "100%",
-              maxWidth: 400,
-              border: "1px solid #374151",
-              boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
+              width: 400,
+              border: "1px solid #334155",
             }}
+            onClick={(e) => e.stopPropagation()}
           >
-            <h3 style={{ margin: "0 0 16px", color: "#e5e7eb", fontSize: 18 }}>작업 수정</h3>
-
-            <div style={{ marginBottom: 16 }}>
-              <label style={{ display: "block", color: "#9ca3af", fontSize: 12, marginBottom: 4 }}>제목</label>
+            <h3 style={{ margin: "0 0 16px", color: "#f1f5f9" }}>Edit Task</h3>
+            <div style={{ marginBottom: 12 }}>
+              <label
+                style={{
+                  display: "block",
+                  fontSize: 12,
+                  color: "#94a3b8",
+                  marginBottom: 4,
+                }}
+              >
+                Title
+              </label>
               <input
                 type="text"
                 value={editingTodo.title}
-                onChange={(e) => setEditingTodo({ ...editingTodo, title: e.target.value })}
+                onChange={(e) =>
+                  setEditingTodo({ ...editingTodo, title: e.target.value })
+                }
                 style={{
                   width: "100%",
-                  padding: "8px",
+                  padding: "8px 12px",
                   borderRadius: 6,
-                  border: "1px solid #374151",
-                  background: "#111827",
-                  color: "#e5e7eb",
-                  fontSize: 14,
+                  border: "1px solid #334155",
+                  background: "#0f172a",
+                  color: "#f1f5f9",
                 }}
               />
             </div>
-
-            <div style={{ marginBottom: 16 }}>
-              <label style={{ display: "block", color: "#9ca3af", fontSize: 12, marginBottom: 4 }}>상태</label>
-              <select
-                value={editingTodo.status}
-                onChange={(e) => setEditingTodo({ ...editingTodo, status: e.target.value })}
+            <div style={{ marginBottom: 20 }}>
+              <label
                 style={{
-                  width: "100%",
-                  padding: "8px",
-                  borderRadius: 6,
-                  border: "1px solid #374151",
-                  background: "#111827",
-                  color: "#e5e7eb",
-                  fontSize: 14,
+                  display: "block",
+                  fontSize: 12,
+                  color: "#94a3b8",
+                  marginBottom: 4,
                 }}
               >
-                <option value="done">완료됨</option>
-                <option value="planned">계획됨</option>
-              </select>
-            </div>
-
-            <div style={{ marginBottom: 24 }}>
-              <label style={{ display: "block", color: "#9ca3af", fontSize: 12, marginBottom: 4 }}>상세 내용</label>
+                Description
+              </label>
               <textarea
+                rows={6}
                 value={editingTodo.desc}
-                onChange={(e) => setEditingTodo({ ...editingTodo, desc: e.target.value })}
-                rows={5}
+                onChange={(e) =>
+                  setEditingTodo({ ...editingTodo, desc: e.target.value })
+                }
                 style={{
                   width: "100%",
-                  padding: "8px",
+                  padding: "8px 12px",
                   borderRadius: 6,
-                  border: "1px solid #374151",
-                  background: "#111827",
-                  color: "#e5e7eb",
-                  fontSize: 14,
+                  border: "1px solid #334155",
+                  background: "#0f172a",
+                  color: "#f1f5f9",
                   resize: "vertical",
                 }}
               />
             </div>
-
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
               <button
                 onClick={() => setIsEditModalOpen(false)}
                 style={{
                   padding: "8px 16px",
                   borderRadius: 6,
-                  border: "1px solid #374151",
+                  border: "1px solid #334155",
                   background: "transparent",
-                  color: "#d1d5db",
+                  color: "#94a3b8",
                   cursor: "pointer",
                 }}
               >
-                취소
+                Cancel
               </button>
               <button
                 onClick={handleSaveEdit}
@@ -745,10 +937,9 @@ function TradingViewAIDashboard() {
                   background: "#3b82f6",
                   color: "#fff",
                   cursor: "pointer",
-                  fontWeight: 600,
                 }}
               >
-                저장
+                Save
               </button>
             </div>
           </div>
