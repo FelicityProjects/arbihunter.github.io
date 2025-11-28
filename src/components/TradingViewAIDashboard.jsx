@@ -66,8 +66,26 @@ const TODO_DATA = [
   {
     id: 7,
     status: 'planned',
-    title: 'LLM 기반 생성형 AI 투자 전략 어드바이저 개발 (예정)',
-    desc: '👉 OpenAI GPT-4o API 연동을 통한 시장 데이터 심층 분석 및 투자 인사이트 도출\n👉 뉴스 감성 분석(Sentiment Analysis) 및 거시 경제 지표를 결합한 멀티모달 분석 모델 도입 예정\n👉 축적된 캔들 데이터와 매수/매도 기록을 재분석하여 로직을 지속적으로 개선하는 자가 학습 메커니즘 구현\n👉 사용자 대화형 투자 어드바이저 챗봇 인터페이스 구현 계획'
+    title: 'OpenAI GPT-4o API 연동 및 시장 데이터 심층 분석',
+    desc: 'OpenAI GPT-4o API 연동을 통한 시장 데이터 심층 분석 및 투자 인사이트 도출'
+  },
+  {
+    id: 8,
+    status: 'planned',
+    title: '뉴스 감성 분석 및 거시 경제 지표 멀티모달 분석',
+    desc: '뉴스 감성 분석(Sentiment Analysis) 및 거시 경제 지표를 결합한 멀티모달 분석 모델 도입'
+  },
+  {
+    id: 9,
+    status: 'planned',
+    title: '자가 학습 메커니즘 및 로직 개선 시스템',
+    desc: '축적된 캔들 데이터와 매수/매도 기록을 재분석하여 로직을 지속적으로 개선하는 자가 학습 메커니즘 구현'
+  },
+  {
+    id: 10,
+    status: 'planned',
+    title: '사용자 대화형 투자 어드바이저 챗봇 인터페이스',
+    desc: '사용자 대화형 투자 어드바이저 챗봇 인터페이스 구현'
   },
 ];
 
@@ -402,21 +420,23 @@ function TradingViewAIDashboard() {
           overflow: "hidden",
         }}
       >
-        {/* 우측(이제 좌측/상단): To-Do List 패널 */}
+        {/* 좌측: Project Roadmap (Planned | Completed) */}
         <div
           style={{
-            width: isMobile ? "100%" : 380,
+            width: isMobile ? "100%" : 350,
             background: "#1e293b",
             borderRight: isMobile ? "none" : "1px solid #334155",
             borderBottom: isMobile ? "1px solid #334155" : "none",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
+            flexShrink: 0,
           }}
         >
+          {/* Roadmap Header */}
           <div
             style={{
-              padding: 16,
+              padding: "12px 16px",
               borderBottom: "1px solid #334155",
               display: "flex",
               justifyContent: "space-between",
@@ -428,9 +448,6 @@ function TradingViewAIDashboard() {
               <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>
                 Project Roadmap
               </h2>
-              <span style={{ fontSize: 12, color: "#60a5fa", fontWeight: 500 }}>
-                * 타이틀 클릭 시 상세 내용 확인
-              </span>
             </div>
             <div style={{ display: "flex", gap: 8 }}>
               <button
@@ -455,256 +472,133 @@ function TradingViewAIDashboard() {
             </div>
           </div>
 
-          <div style={{ flex: 1, overflowY: "auto", padding: 16 }}>
+          {/* Vertical Content: Planned -> Completed */}
+          <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" }}>
+
             {/* Planned Section */}
-            <div style={{ marginBottom: 24 }}>
-              <h3
-                style={{
-                  fontSize: 12,
-                  fontWeight: 700,
-                  color: "#f59e0b",
-                  marginBottom: 12,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                }}
-              >
-                <span
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <div style={{ padding: "12px 16px", background: "#1e293b", borderBottom: "1px solid #334155", position: "sticky", top: 0, zIndex: 10 }}>
+                <h3
                   style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: "50%",
-                    background: "#f59e0b",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: "#f59e0b",
+                    margin: 0,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
                   }}
-                />
-                In Progress / Planned
-              </h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                >
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#f59e0b" }} />
+                  In Progress / Planned
+                </h3>
+              </div>
+              <div style={{ padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
                 {todos
                   .filter((t) => t.status === "planned")
                   .map((todo) => (
                     <div
                       key={todo.id}
-                      onClick={() => setSelectedTodo(todo)}
                       style={{
-                        background:
-                          selectedTodo?.id === todo.id ? "#334155" : "#0f172a",
+                        background: "#0f172a",
                         padding: 12,
                         borderRadius: 8,
-                        border:
-                          selectedTodo?.id === todo.id
-                            ? "1px solid #f59e0b"
-                            : "1px solid #334155",
-                        cursor: "pointer",
-                        transition: "all 0.2s",
+                        border: "1px solid #334155",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        gap: 8,
                       }}
                     >
-                      <div
-                        style={{
-                          fontSize: 14,
-                          fontWeight: 600,
-                          marginBottom: 4,
-                          color: "#f1f5f9",
-                          lineHeight: 1.4,
-                        }}
-                      >
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "#f1f5f9", lineHeight: 1.4, flex: 1 }}>
                         {todo.title}
                       </div>
-                      {selectedTodo?.id === todo.id && (
-                        <div
-                          style={{
-                            marginTop: 8,
-                            fontSize: 13,
-                            color: "#cbd5e1",
-                            lineHeight: 1.6,
-                            whiteSpace: "pre-wrap",
-                            background: "#1e293b",
-                            padding: "8px 10px",
-                            borderRadius: 6,
-                            border: "1px solid #475569",
-                          }}
-                        >
-                          {todo.desc}
-                        </div>
-                      )}
-                      {selectedTodo?.id === todo.id && (
-                        <div
-                          style={{
-                            marginTop: 10,
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            gap: 8,
-                          }}
-                        >
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEditClick(todo);
-                            }}
-                            style={{
-                              fontSize: 11,
-                              padding: "4px 8px",
-                              background: "#3b82f6",
-                              border: "none",
-                              borderRadius: 4,
-                              color: "#fff",
-                              cursor: "pointer",
-                            }}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteTodo("planned");
-                            }}
-                            style={{
-                              fontSize: 11,
-                              padding: "4px 8px",
-                              background: "#ef4444",
-                              border: "none",
-                              borderRadius: 4,
-                              color: "#fff",
-                              cursor: "pointer",
-                            }}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      )}
+                      <button
+                        onClick={() => setSelectedTodo(todo)}
+                        style={{
+                          fontSize: 11,
+                          padding: "4px 8px",
+                          background: "#334155",
+                          border: "none",
+                          borderRadius: 4,
+                          color: "#94a3b8",
+                          cursor: "pointer",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        상세
+                      </button>
                     </div>
                   ))}
               </div>
             </div>
 
-            {/* Done Section */}
-            <div>
-              <h3
-                style={{
-                  fontSize: 12,
-                  fontWeight: 700,
-                  color: "#10b981",
-                  marginBottom: 12,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 6,
-                }}
-              >
-                <span
+            {/* Completed Section */}
+            <div style={{ display: "flex", flexDirection: "column", borderTop: "1px solid #334155" }}>
+              <div style={{ padding: "12px 16px", background: "#1e293b", borderBottom: "1px solid #334155", position: "sticky", top: 0, zIndex: 10 }}>
+                <h3
                   style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: "50%",
-                    background: "#10b981",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: "#10b981",
+                    margin: 0,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
                   }}
-                />
-                Completed
-              </h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                >
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#10b981" }} />
+                  Completed
+                </h3>
+              </div>
+              <div style={{ padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
                 {todos
                   .filter((t) => t.status === "done")
                   .map((todo) => (
                     <div
                       key={todo.id}
-                      onClick={() => setSelectedTodo(todo)}
                       style={{
-                        background:
-                          selectedTodo?.id === todo.id ? "#334155" : "#0f172a",
+                        background: "#0f172a",
                         padding: 12,
                         borderRadius: 8,
-                        border:
-                          selectedTodo?.id === todo.id
-                            ? "1px solid #3b82f6"
-                            : "1px solid #334155",
-                        cursor: "pointer",
-                        transition: "all 0.2s",
+                        border: "1px solid #334155",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        gap: 8,
                       }}
                     >
-                      <div
-                        style={{
-                          fontSize: 14,
-                          fontWeight: 600,
-                          marginBottom: 4,
-                          color: "#f1f5f9",
-                          lineHeight: 1.4,
-                        }}
-                      >
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "#f1f5f9", lineHeight: 1.4, flex: 1 }}>
                         {todo.title}
                       </div>
-                      {selectedTodo?.id === todo.id && (
-                        <div
-                          style={{
-                            marginTop: 8,
-                            fontSize: 13,
-                            color: "#cbd5e1",
-                            lineHeight: 1.6,
-                            whiteSpace: "pre-wrap",
-                            background: "#1e293b",
-                            padding: "8px 10px",
-                            borderRadius: 6,
-                            border: "1px solid #475569",
-                          }}
-                        >
-                          {todo.desc}
-                        </div>
-                      )}
-                      {selectedTodo?.id === todo.id && (
-                        <div
-                          style={{
-                            marginTop: 10,
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            gap: 8,
-                          }}
-                        >
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEditClick(todo);
-                            }}
-                            style={{
-                              fontSize: 11,
-                              padding: "4px 8px",
-                              background: "#3b82f6",
-                              border: "none",
-                              borderRadius: 4,
-                              color: "#fff",
-                              cursor: "pointer",
-                            }}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteTodo("done");
-                            }}
-                            style={{
-                              fontSize: 11,
-                              padding: "4px 8px",
-                              background: "#ef4444",
-                              border: "none",
-                              borderRadius: 4,
-                              color: "#fff",
-                              cursor: "pointer",
-                            }}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      )}
+                      <button
+                        onClick={() => setSelectedTodo(todo)}
+                        style={{
+                          fontSize: 11,
+                          padding: "4px 8px",
+                          background: "#334155",
+                          border: "none",
+                          borderRadius: 4,
+                          color: "#94a3b8",
+                          cursor: "pointer",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        상세
+                      </button>
                     </div>
                   ))}
               </div>
             </div>
+
           </div>
         </div>
 
-        {/* 좌측(이제 우측/하단): 4분할 차트 영역 */}
+        {/* 우측: 4분할 차트 영역 */}
         <div
           style={{
             flex: 1,
@@ -800,174 +694,297 @@ function TradingViewAIDashboard() {
         </div>
       </div>
 
-      {/* RSI 분석 모달 (React Portal or Conditional Rendering) */}
-      {showRsiView && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            background: "rgba(0,0,0,0.7)",
-            zIndex: 9999,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 20,
-          }}
-          onClick={() => setShowRsiView(false)}
-        >
+
+
+      {/* Detail Modal */}
+      {
+        selectedTodo && (
           <div
             style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
               width: "100%",
-              maxWidth: 1000,
-              maxHeight: "90vh",
-              overflowY: "auto",
-              background: "#fff",
-              borderRadius: 16,
+              height: "100%",
+              background: "rgba(0, 0, 0, 0.6)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 1000,
             }}
-            onClick={(e) => e.stopPropagation()}
+            onClick={() => setSelectedTodo(null)}
           >
-            {/* 닫기 버튼 */}
-            <div style={{ display: "flex", justifyContent: "flex-end", padding: 10 }}>
-              <button
-                onClick={() => setShowRsiView(false)}
+            <div
+              style={{
+                width: "90%",
+                maxWidth: 500,
+                background: "#1e293b",
+                borderRadius: 12,
+                border: "1px solid #334155",
+                overflow: "hidden",
+                boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div
                 style={{
-                  background: "transparent",
-                  border: "none",
-                  fontSize: 24,
-                  cursor: "pointer",
-                  color: "#333",
+                  padding: "16px 20px",
+                  background: "#0f172a",
+                  borderBottom: "1px solid #334155",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
                 }}
               >
-                &times;
-              </button>
+                <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: "#f1f5f9" }}>
+                  상세 내용
+                </h3>
+                <button
+                  onClick={() => setSelectedTodo(null)}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    color: "#94a3b8",
+                    cursor: "pointer",
+                    fontSize: 20,
+                  }}
+                >
+                  &times;
+                </button>
+              </div>
+              <div style={{ padding: 20 }}>
+                <div style={{ fontSize: 16, fontWeight: 700, color: "#f1f5f9", marginBottom: 12, lineHeight: 1.4 }}>
+                  {selectedTodo.title}
+                </div>
+                <div
+                  style={{
+                    fontSize: 14,
+                    color: "#cbd5e1",
+                    lineHeight: 1.6,
+                    whiteSpace: "pre-wrap",
+                    background: "#0f172a",
+                    padding: 16,
+                    borderRadius: 8,
+                    border: "1px solid #334155",
+                    maxHeight: "60vh",
+                    overflowY: "auto",
+                  }}
+                >
+                  {selectedTodo.desc}
+                </div>
+                <div style={{ marginTop: 20, display: "flex", justifyContent: "flex-end", gap: 8 }}>
+                  <button
+                    onClick={() => {
+                      handleEditClick(selectedTodo);
+                      setSelectedTodo(null); // Close detail modal when opening edit
+                    }}
+                    style={{
+                      fontSize: 13,
+                      padding: "8px 16px",
+                      background: "#3b82f6",
+                      border: "none",
+                      borderRadius: 6,
+                      color: "#fff",
+                      cursor: "pointer",
+                      fontWeight: 600,
+                    }}
+                  >
+                    수정
+                  </button>
+                  <button
+                    onClick={() => setSelectedTodo(null)}
+                    style={{
+                      fontSize: 13,
+                      padding: "8px 16px",
+                      background: "#64748b",
+                      border: "none",
+                      borderRadius: 6,
+                      color: "#fff",
+                      cursor: "pointer",
+                      fontWeight: 600,
+                    }}
+                  >
+                    닫기
+                  </button>
+                </div>
+              </div>
             </div>
-            {/* RSI 컴포넌트 */}
-            <RsiGptFrontOnlyDemo
-              activeSymbol={chartConfigs[0]?.symbol?.replace("BINANCE:", "") || "BTCUSDT"}
-              activeTimeframe={chartConfigs[0]?.timeframe === "D" ? "1d" : "1h"}
-            />
           </div>
-        </div>
-      )}
+        )
+      }
+
+      {/* RSI 분석 모달 (React Portal or Conditional Rendering) */}
+      {
+        showRsiView && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              background: "rgba(0,0,0,0.7)",
+              zIndex: 9999,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: 20,
+            }}
+            onClick={() => setShowRsiView(false)}
+          >
+            <div
+              style={{
+                width: "100%",
+                maxWidth: 1000,
+                maxHeight: "90vh",
+                overflowY: "auto",
+                background: "#fff",
+                borderRadius: 16,
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* 닫기 버튼 */}
+              <div style={{ display: "flex", justifyContent: "flex-end", padding: 10 }}>
+                <button
+                  onClick={() => setShowRsiView(false)}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    fontSize: 24,
+                    cursor: "pointer",
+                    color: "#333",
+                  }}
+                >
+                  &times;
+                </button>
+              </div>
+              {/* RSI 컴포넌트 */}
+              <RsiGptFrontOnlyDemo
+                activeSymbol={chartConfigs[0]?.symbol?.replace("BINANCE:", "") || "BTCUSDT"}
+                activeTimeframe={chartConfigs[0]?.timeframe === "D" ? "1d" : "1h"}
+              />
+            </div>
+          </div>
+        )
+      }
 
       {/* Edit Modal */}
-      {isEditModalOpen && editingTodo && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            background: "rgba(0,0,0,0.7)",
-            zIndex: 10000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          onClick={() => setIsEditModalOpen(false)}
-        >
+      {
+        isEditModalOpen && editingTodo && (
           <div
             style={{
-              background: "#1e293b",
-              padding: 24,
-              borderRadius: 12,
-              width: 400,
-              border: "1px solid #334155",
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              background: "rgba(0,0,0,0.7)",
+              zIndex: 10000,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
-            onClick={(e) => e.stopPropagation()}
+            onClick={() => setIsEditModalOpen(false)}
           >
-            <h3 style={{ margin: "0 0 16px", color: "#f1f5f9" }}>Edit Task</h3>
-            <div style={{ marginBottom: 12 }}>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: 12,
-                  color: "#94a3b8",
-                  marginBottom: 4,
-                }}
-              >
-                Title
-              </label>
-              <input
-                type="text"
-                value={editingTodo.title}
-                onChange={(e) =>
-                  setEditingTodo({ ...editingTodo, title: e.target.value })
-                }
-                style={{
-                  width: "100%",
-                  padding: "8px 12px",
-                  borderRadius: 6,
-                  border: "1px solid #334155",
-                  background: "#0f172a",
-                  color: "#f1f5f9",
-                }}
-              />
-            </div>
-            <div style={{ marginBottom: 20 }}>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: 12,
-                  color: "#94a3b8",
-                  marginBottom: 4,
-                }}
-              >
-                Description
-              </label>
-              <textarea
-                rows={6}
-                value={editingTodo.desc}
-                onChange={(e) =>
-                  setEditingTodo({ ...editingTodo, desc: e.target.value })
-                }
-                style={{
-                  width: "100%",
-                  padding: "8px 12px",
-                  borderRadius: 6,
-                  border: "1px solid #334155",
-                  background: "#0f172a",
-                  color: "#f1f5f9",
-                  resize: "vertical",
-                }}
-              />
-            </div>
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-              <button
-                onClick={() => setIsEditModalOpen(false)}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: 6,
-                  border: "1px solid #334155",
-                  background: "transparent",
-                  color: "#94a3b8",
-                  cursor: "pointer",
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveEdit}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: 6,
-                  border: "none",
-                  background: "#3b82f6",
-                  color: "#fff",
-                  cursor: "pointer",
-                }}
-              >
-                Save
-              </button>
+            <div
+              style={{
+                background: "#1e293b",
+                padding: 24,
+                borderRadius: 12,
+                width: 400,
+                border: "1px solid #334155",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 style={{ margin: "0 0 16px", color: "#f1f5f9" }}>Edit Task</h3>
+              <div style={{ marginBottom: 12 }}>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: 12,
+                    color: "#94a3b8",
+                    marginBottom: 4,
+                  }}
+                >
+                  Title
+                </label>
+                <input
+                  type="text"
+                  value={editingTodo.title}
+                  onChange={(e) =>
+                    setEditingTodo({ ...editingTodo, title: e.target.value })
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "8px 12px",
+                    borderRadius: 6,
+                    border: "1px solid #334155",
+                    background: "#0f172a",
+                    color: "#f1f5f9",
+                  }}
+                />
+              </div>
+              <div style={{ marginBottom: 20 }}>
+                <label
+                  style={{
+                    display: "block",
+                    fontSize: 12,
+                    color: "#94a3b8",
+                    marginBottom: 4,
+                  }}
+                >
+                  Description
+                </label>
+                <textarea
+                  rows={6}
+                  value={editingTodo.desc}
+                  onChange={(e) =>
+                    setEditingTodo({ ...editingTodo, desc: e.target.value })
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "8px 12px",
+                    borderRadius: 6,
+                    border: "1px solid #334155",
+                    background: "#0f172a",
+                    color: "#f1f5f9",
+                    resize: "vertical",
+                  }}
+                />
+              </div>
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+                <button
+                  onClick={() => setIsEditModalOpen(false)}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: 6,
+                    border: "1px solid #334155",
+                    background: "transparent",
+                    color: "#94a3b8",
+                    cursor: "pointer",
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveEdit}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: 6,
+                    border: "none",
+                    background: "#3b82f6",
+                    color: "#fff",
+                    cursor: "pointer",
+                  }}
+                >
+                  Save
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   );
 }
 
