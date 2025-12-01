@@ -4,9 +4,6 @@ import RsiGptFrontOnlyDemo from "./RsiGptFrontOnlyDemo";
 // 4개의 차트 컨테이너 ID
 const CHART_IDS = [
   "tradingview_chart_1",
-  "tradingview_chart_2",
-  "tradingview_chart_3",
-  "tradingview_chart_4",
 ];
 
 const TIMEFRAMES = [
@@ -20,9 +17,6 @@ const TIMEFRAMES = [
 // 기본 심볼 (초기값을 차트별로 다르게 설정)
 const DEFAULT_SYMBOLS = [
   "BINANCE:ETHUSDT",
-  "BINANCE:BTCUSDT",
-  "BINANCE:SOLUSDT",
-  "NASDAQ:TSLA",
 ];
 
 // Refactored To-Do Data
@@ -30,8 +24,8 @@ const TODO_DATA = [
   {
     id: 1,
     status: 'done',
-    title: '웹 애플리케이션 초기 아키텍처 설계 및 4분할 차트 시스템 구현',
-    desc: '✅ React 18 기반 SPA(Single Page Application) 프로젝트 초기화 및 디렉토리 구조 설계\n✅ TradingView Advanced Real-Time Chart Widget 연동 및 커스텀 옵션 적용\n✅ CSS Grid 활용 반응형 4분할 차트 레이아웃 (Desktop/Mobile 최적화)\n✅ GitHub Pages 정적 호스팅 환경 구축 및 배포 자동화 기반 마련'
+    title: '웹 애플리케이션 초기 아키텍처 설계 및 반응형 차트 시스템 구현',
+    desc: '✅ React 18 기반 SPA(Single Page Application) 프로젝트 초기화 및 디렉토리 구조 설계\n✅ TradingView Advanced Real-Time Chart Widget 연동 및 커스텀 옵션 적용\n✅ CSS Grid 활용 반응형 차트 레이아웃 (Desktop/Mobile 최적화)\n✅ GitHub Pages 정적 호스팅 환경 구축 및 배포 자동화 기반 마련'
   },
   {
     id: 2,
@@ -198,10 +192,12 @@ function TradingViewAIDashboard() {
       tradingViewIndices.forEach((idx) => {
         const id = CHART_IDS[idx];
         const container = document.getElementById(id);
+        if (idx === 1) return; // Skip Bitcoin chart widget creation
+
         if (!container) {
-          setError((prev) =>
-            prev ? prev + `\n컨테이너 ${id} 없음` : `컨테이너 ${id} 없음`
-          );
+          // setError((prev) =>
+          //   prev ? prev + `\n컨테이너 ${id} 없음` : `컨테이너 ${id} 없음`
+          // );
           return;
         }
 
@@ -323,7 +319,8 @@ function TradingViewAIDashboard() {
     <div
       style={{
         width: "100%",
-        minHeight: "100vh",
+        height: "100vh",
+        overflow: "hidden",
         background: "#0f172a",
         color: "#e2e8f0",
         fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
@@ -420,23 +417,148 @@ function TradingViewAIDashboard() {
           overflow: "hidden",
         }}
       >
-        {/* 좌측: Project Roadmap (Planned | Completed) */}
+        {/* 좌측: 2분할 차트 영역 */}
         <div
           style={{
-            width: isMobile ? "100%" : 350,
+            flex: 1,
+            padding: 10,
+            overflowY: "auto",
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+            gridTemplateRows: isMobile ? "repeat(2, 400px)" : "1fr",
+            gap: 10,
+          }}
+        >
+          {/* Chart 1: Ethereum */}
+          <div
+            style={{
+              background: "#1e293b",
+              borderRadius: 12,
+              border: "1px solid #334155",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+              position: "relative",
+            }}
+          >
+            {/* 차트 상단 툴바 */}
+            <div
+              style={{
+                height: 40,
+                background: "#0f172a",
+                borderBottom: "1px solid #334155",
+                display: "flex",
+                alignItems: "center",
+                padding: "0 10px",
+                justifyContent: "space-between",
+              }}
+            >
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <span
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: "#94a3b8",
+                    marginRight: 4,
+                  }}
+                >
+                  CHART 1
+                </span>
+                <select
+                  value={chartConfigs[0].symbol}
+                  onChange={(e) => handleSymbolChange(0, e.target.value)}
+                  style={{
+                    background: "#334155",
+                    color: "#f1f5f9",
+                    border: "none",
+                    borderRadius: 4,
+                    padding: "4px 8px",
+                    fontSize: 12,
+                    cursor: "pointer",
+                  }}
+                >
+                  {DEFAULT_SYMBOLS.map((sym) => (
+                    <option key={sym} value={sym}>
+                      {sym.split(":")[1]}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={chartConfigs[0].timeframe}
+                  onChange={(e) => handleTimeframeChange(0, e.target.value)}
+                  style={{
+                    background: "#334155",
+                    color: "#f1f5f9",
+                    border: "none",
+                    borderRadius: 4,
+                    padding: "4px 8px",
+                    fontSize: 12,
+                    cursor: "pointer",
+                  }}
+                >
+                  {TIMEFRAMES.map((tf) => (
+                    <option key={tf.value} value={tf.value}>
+                      {tf.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* TradingView 위젯 컨테이너 */}
+            <div id={CHART_IDS[0]} style={{ flex: 1, width: "100%", height: "100%" }} />
+          </div>
+
+          {/* Automatic Trading Results Area */}
+          <div
+            style={{
+              background: "#1e293b",
+              borderRadius: 12,
+              border: "1px solid #334155",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+              position: "relative",
+            }}
+          >
+            <div
+              style={{
+                height: 40,
+                background: "#0f172a",
+                borderBottom: "1px solid #334155",
+                display: "flex",
+                alignItems: "center",
+                padding: "0 16px",
+              }}
+            >
+              <h3 style={{ fontSize: 14, fontWeight: 700, color: "#f1f5f9", margin: 0 }}>
+                Automatic Trading Results
+              </h3>
+            </div>
+            <div style={{ flex: 1, padding: 20, color: "#94a3b8", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              자동 거래 결과가 여기에 표시됩니다.
+            </div>
+          </div>
+        </div>
+
+        {/* 우측: Project Roadmap (Compact) */}
+        <div
+          style={{
+            width: isMobile ? "100%" : 280, // Reduced width
             background: "#1e293b",
-            borderRight: isMobile ? "none" : "1px solid #334155",
-            borderBottom: isMobile ? "1px solid #334155" : "none",
+            borderLeft: isMobile ? "none" : "1px solid #334155", // Changed border to left
+            borderTop: isMobile ? "1px solid #334155" : "none",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
             flexShrink: 0,
+            fontSize: 13, // Reduced base font size
           }}
         >
           {/* Roadmap Header */}
           <div
             style={{
-              padding: "12px 16px",
+              padding: "8px 12px", // Reduced padding
               borderBottom: "1px solid #334155",
               display: "flex",
               justifyContent: "space-between",
@@ -445,7 +567,7 @@ function TradingViewAIDashboard() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <h2 style={{ fontSize: 16, fontWeight: 700, margin: 0 }}>
+              <h2 style={{ fontSize: 14, fontWeight: 700, margin: 0 }}> {/* Reduced font size */}
                 Project Roadmap
               </h2>
             </div>
@@ -456,11 +578,11 @@ function TradingViewAIDashboard() {
                   background: "#334155",
                   border: "none",
                   color: "#94a3b8",
-                  width: 28,
-                  height: 28,
+                  width: 24, // Reduced size
+                  height: 24, // Reduced size
                   borderRadius: 4,
                   cursor: "pointer",
-                  fontSize: 16,
+                  fontSize: 14, // Reduced font size
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -473,14 +595,14 @@ function TradingViewAIDashboard() {
           </div>
 
           {/* Vertical Content: Planned -> Completed */}
-          <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" }}>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
 
             {/* Planned Section */}
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <div style={{ padding: "12px 16px", background: "#1e293b", borderBottom: "1px solid #334155", position: "sticky", top: 0, zIndex: 10 }}>
+            <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" }}>
+              <div style={{ padding: "8px 12px", background: "#1e293b", borderBottom: "1px solid #334155", position: "sticky", top: 0, zIndex: 10 }}>
                 <h3
                   style={{
-                    fontSize: 12,
+                    fontSize: 11, // Reduced font size
                     fontWeight: 700,
                     color: "#f59e0b",
                     margin: 0,
@@ -491,11 +613,11 @@ function TradingViewAIDashboard() {
                     gap: 6,
                   }}
                 >
-                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#f59e0b" }} />
+                  <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#f59e0b" }} />
                   In Progress / Planned
                 </h3>
               </div>
-              <div style={{ padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+              <div style={{ padding: 8, display: "flex", flexDirection: "column", gap: 6 }}> {/* Reduced padding/gap */}
                 {todos
                   .filter((t) => t.status === "planned")
                   .map((todo) => (
@@ -503,26 +625,26 @@ function TradingViewAIDashboard() {
                       key={todo.id}
                       style={{
                         background: "#0f172a",
-                        padding: 12,
-                        borderRadius: 8,
+                        padding: 8, // Reduced padding
+                        borderRadius: 6,
                         border: "1px solid #334155",
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
-                        gap: 8,
+                        gap: 6,
                       }}
                     >
-                      <div style={{ fontSize: 13, fontWeight: 600, color: "#f1f5f9", lineHeight: 1.4, flex: 1 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: "#f1f5f9", lineHeight: 1.3, flex: 1 }}> {/* Reduced font size */}
                         {todo.title}
                       </div>
                       <button
                         onClick={() => setSelectedTodo(todo)}
                         style={{
-                          fontSize: 11,
-                          padding: "4px 8px",
+                          fontSize: 10, // Reduced font size
+                          padding: "2px 6px", // Reduced padding
                           background: "#334155",
                           border: "none",
-                          borderRadius: 4,
+                          borderRadius: 3,
                           color: "#94a3b8",
                           cursor: "pointer",
                           whiteSpace: "nowrap",
@@ -536,11 +658,11 @@ function TradingViewAIDashboard() {
             </div>
 
             {/* Completed Section */}
-            <div style={{ display: "flex", flexDirection: "column", borderTop: "1px solid #334155" }}>
-              <div style={{ padding: "12px 16px", background: "#1e293b", borderBottom: "1px solid #334155", position: "sticky", top: 0, zIndex: 10 }}>
+            <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", borderTop: "1px solid #334155" }}>
+              <div style={{ padding: "8px 12px", background: "#1e293b", borderBottom: "1px solid #334155", position: "sticky", top: 0, zIndex: 10 }}>
                 <h3
                   style={{
-                    fontSize: 12,
+                    fontSize: 11, // Reduced font size
                     fontWeight: 700,
                     color: "#10b981",
                     margin: 0,
@@ -551,11 +673,11 @@ function TradingViewAIDashboard() {
                     gap: 6,
                   }}
                 >
-                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#10b981" }} />
+                  <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#10b981" }} />
                   Completed
                 </h3>
               </div>
-              <div style={{ padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+              <div style={{ padding: 8, display: "flex", flexDirection: "column", gap: 6 }}> {/* Reduced padding/gap */}
                 {todos
                   .filter((t) => t.status === "done")
                   .map((todo) => (
@@ -563,26 +685,26 @@ function TradingViewAIDashboard() {
                       key={todo.id}
                       style={{
                         background: "#0f172a",
-                        padding: 12,
-                        borderRadius: 8,
+                        padding: 8, // Reduced padding
+                        borderRadius: 6,
                         border: "1px solid #334155",
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
-                        gap: 8,
+                        gap: 6,
                       }}
                     >
-                      <div style={{ fontSize: 13, fontWeight: 600, color: "#f1f5f9", lineHeight: 1.4, flex: 1 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: "#f1f5f9", lineHeight: 1.3, flex: 1 }}> {/* Reduced font size */}
                         {todo.title}
                       </div>
                       <button
                         onClick={() => setSelectedTodo(todo)}
                         style={{
-                          fontSize: 11,
-                          padding: "4px 8px",
+                          fontSize: 10, // Reduced font size
+                          padding: "2px 6px", // Reduced padding
                           background: "#334155",
                           border: "none",
-                          borderRadius: 4,
+                          borderRadius: 3,
                           color: "#94a3b8",
                           cursor: "pointer",
                           whiteSpace: "nowrap",
@@ -596,101 +718,6 @@ function TradingViewAIDashboard() {
             </div>
 
           </div>
-        </div>
-
-        {/* 우측: 4분할 차트 영역 */}
-        <div
-          style={{
-            flex: 1,
-            padding: 10,
-            overflowY: "auto",
-            display: "grid",
-            gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-            gridTemplateRows: isMobile ? "repeat(4, 400px)" : "1fr 1fr",
-            gap: 10,
-          }}
-        >
-          {CHART_IDS.map((id, idx) => (
-            <div
-              key={id}
-              style={{
-                background: "#1e293b",
-                borderRadius: 12,
-                border: "1px solid #334155",
-                display: "flex",
-                flexDirection: "column",
-                overflow: "hidden",
-                position: "relative",
-              }}
-            >
-              {/* 차트 상단 툴바 */}
-              <div
-                style={{
-                  height: 40,
-                  background: "#0f172a",
-                  borderBottom: "1px solid #334155",
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "0 10px",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                  <span
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 700,
-                      color: "#94a3b8",
-                      marginRight: 4,
-                    }}
-                  >
-                    CHART {idx + 1}
-                  </span>
-                  <select
-                    value={chartConfigs[idx].symbol}
-                    onChange={(e) => handleSymbolChange(idx, e.target.value)}
-                    style={{
-                      background: "#334155",
-                      color: "#f1f5f9",
-                      border: "none",
-                      borderRadius: 4,
-                      padding: "4px 8px",
-                      fontSize: 12,
-                      cursor: "pointer",
-                    }}
-                  >
-                    {DEFAULT_SYMBOLS.map((sym) => (
-                      <option key={sym} value={sym}>
-                        {sym.split(":")[1]}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={chartConfigs[idx].timeframe}
-                    onChange={(e) => handleTimeframeChange(idx, e.target.value)}
-                    style={{
-                      background: "#334155",
-                      color: "#f1f5f9",
-                      border: "none",
-                      borderRadius: 4,
-                      padding: "4px 8px",
-                      fontSize: 12,
-                      cursor: "pointer",
-                    }}
-                  >
-                    {TIMEFRAMES.map((tf) => (
-                      <option key={tf.value} value={tf.value}>
-                        {tf.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* TradingView 위젯 컨테이너 */}
-              <div id={id} style={{ flex: 1, width: "100%", height: "100%" }} />
-            </div>
-          ))}
         </div>
       </div>
 
