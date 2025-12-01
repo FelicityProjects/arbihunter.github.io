@@ -58,6 +58,12 @@ const TODO_DATA = [
     desc: '✅ **전략 개요**: RSI(14) + EMA(200) + 볼린저 밴드(20,2) + 다이버전스를 결합한 고승률 매매 전략\n✅ **매수 시그널**: 가격 > 200 EMA (상승 추세) AND (RSI < 30 과매도 OR 상승 다이버전스 발생 OR 볼린저 하단 터치)\n✅ **매도 시그널**: 가격 < 200 EMA (하락 추세) AND (RSI > 70 과매수 OR 하락 다이버전스 발생 OR 볼린저 상단 터치)\n✅ **신호 강도 시각화**: 강력(Strong)/일반(Normal)/단기(Weak) 3단계 신호 강도 구분 및 직관적 컬러 코딩(Deep/Light Green & Red) 적용'
   },
   {
+    id: 11,
+    status: 'planned',
+    title: '자동 매매 결과 UI 구축 및 백엔드 API 연동',
+    desc: '✅ 메인 윈도우 스크롤바 이슈 해결 (Viewport Height 고정 및 Overflow 처리)\n✅ "Automatic Trading Results" 섹션 UI 구현 (요약 카드, 최근 거래 내역 테이블)\n✅ 결과 섹션 탭 인터페이스 도입 (RSI/볼벤, MACD/KDJ 등 확장성 고려)\n✅ 탭 스타일 개선 (Bottom Border Highlight 적용으로 시인성 강화)\n✅ /api/trading/history 엔드포인트 연동 및 실시간 데이터 바인딩\n✅ 탭 활성화 시 데이터 자동 갱신 로직 구현 (초기 로드 및 탭 전환 시 Fetch)'
+  },
+  {
     id: 7,
     status: 'planned',
     title: 'OpenAI GPT-4o API 연동 및 시장 데이터 심층 분석',
@@ -82,6 +88,24 @@ const TODO_DATA = [
     desc: '사용자 대화형 투자 어드바이저 챗봇 인터페이스 구현'
   },
 ];
+
+// Mock Data for Auto Trading Results
+const TRADING_RESULTS = {
+  summary: {
+    totalProfit: "+ $1,245.50",
+    winRate: "68.5%",
+    profitFactor: "1.85",
+    totalTrades: 42,
+  },
+  recentTrades: [
+    { id: 1, type: "SELL", symbol: "ETHUSDT", price: "3,450.20", amount: "1.5 ETH", time: "2024-05-20 14:30", pnl: "+ $120.50", status: "Closed", pnlClass: "text-green-500" },
+    { id: 2, type: "BUY", symbol: "ETHUSDT", price: "3,410.00", amount: "1.5 ETH", time: "2024-05-20 09:15", pnl: "-", status: "Open", pnlClass: "text-gray-400" },
+    { id: 3, type: "SELL", symbol: "BTCUSDT", price: "68,500.00", amount: "0.1 BTC", time: "2024-05-19 18:45", pnl: "- $50.00", status: "Closed", pnlClass: "text-red-500" },
+    { id: 4, type: "BUY", symbol: "BTCUSDT", price: "68,200.00", amount: "0.1 BTC", time: "2024-05-19 10:00", pnl: "+ $300.00", status: "Closed", pnlClass: "text-green-500" },
+    { id: 5, type: "SELL", symbol: "SOLUSDT", price: "175.50", amount: "20 SOL", time: "2024-05-18 22:10", pnl: "+ $85.20", status: "Closed", pnlClass: "text-green-500" },
+    { id: 6, type: "BUY", symbol: "SOLUSDT", price: "170.00", amount: "20 SOL", time: "2024-05-18 15:30", pnl: "-", status: "Closed", pnlClass: "text-gray-400" },
+  ]
+};
 
 function TradingViewAIDashboard() {
   // 반응형 (모바일 여부)
@@ -162,6 +186,8 @@ function TradingViewAIDashboard() {
   const [analysis, setAnalysis] = useState(null);
   const [error, setError] = useState(null);
   const [showRsiView, setShowRsiView] = useState(false);
+  const [activeResultTab, setActiveResultTab] = useState("rsi_bb");
+  const [tradingHistory, setTradingHistory] = useState(null);
 
   // TradingView 위젯 인스턴스 ref
   const widgetRefs = useRef([]);
@@ -289,6 +315,29 @@ function TradingViewAIDashboard() {
       }
     };
   }, [chartConfigs]);
+
+  // Trading History API 호출
+  const fetchTradingHistory = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/trading/history");
+      if (!response.ok) {
+        throw new Error("Failed to fetch trading history");
+      }
+      const data = await response.json();
+      setTradingHistory(data);
+    } catch (err) {
+      console.error("Error fetching trading history:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (activeResultTab === "rsi_bb") {
+      fetchTradingHistory();
+      // 30초마다 갱신
+      const interval = setInterval(fetchTradingHistory, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [activeResultTab]);
 
   // 차트 설정 변경 핸들러
   const handleSymbolChange = (idx, newSymbol) => {
@@ -529,14 +578,133 @@ function TradingViewAIDashboard() {
                 display: "flex",
                 alignItems: "center",
                 padding: "0 16px",
+                justifyContent: "space-between",
               }}
             >
               <h3 style={{ fontSize: 14, fontWeight: 700, color: "#f1f5f9", margin: 0 }}>
                 Automatic Trading Results
               </h3>
+              <div style={{ display: "flex", gap: 16, height: "100%" }}>
+                {[
+                  { id: "rsi_bb", label: "RSI/볼벤" },
+                  { id: "macd_kdj", label: "MACD/KDJ" },
+                  { id: "vol_price", label: "Volume/Price" },
+                  { id: "ai_forecast", label: "AI Forecast" },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveResultTab(tab.id)}
+                    style={{
+                      background: "transparent",
+                      color: activeResultTab === tab.id ? "#3b82f6" : "#94a3b8",
+                      border: "none",
+                      borderBottom: activeResultTab === tab.id ? "2px solid #3b82f6" : "2px solid transparent",
+                      padding: "0 4px",
+                      fontSize: 12,
+                      fontWeight: activeResultTab === tab.id ? 700 : 600,
+                      cursor: "pointer",
+                      transition: "all 0.2s",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div style={{ flex: 1, padding: 20, color: "#94a3b8", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              자동 거래 결과가 여기에 표시됩니다.
+            <div style={{ flex: 1, padding: 16, display: "flex", flexDirection: "column", gap: 16, overflowY: "auto" }}>
+              {activeResultTab === "rsi_bb" ? (
+                <>
+                  {/* Summary Cards */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+                    <div style={{ background: "#0f172a", padding: 12, borderRadius: 8, border: "1px solid #334155", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                      <span style={{ fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>Current Balance</span>
+                      <span style={{ fontSize: 16, fontWeight: 700, color: "#10b981" }}>
+                        {tradingHistory ? `$${tradingHistory.balance.toLocaleString()}` : "-"}
+                      </span>
+                    </div>
+                    <div style={{ background: "#0f172a", padding: 12, borderRadius: 8, border: "1px solid #334155", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                      <span style={{ fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>Holding Amount</span>
+                      <span style={{ fontSize: 16, fontWeight: 700, color: "#3b82f6" }}>
+                        {tradingHistory?.holding ? `${tradingHistory.holding.amount}` : "0"}
+                      </span>
+                    </div>
+                    <div style={{ background: "#0f172a", padding: 12, borderRadius: 8, border: "1px solid #334155", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                      <span style={{ fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>Avg Price</span>
+                      <span style={{ fontSize: 16, fontWeight: 700, color: "#f59e0b" }}>
+                        {tradingHistory?.holding ? `$${tradingHistory.holding.price.toLocaleString()}` : "-"}
+                      </span>
+                    </div>
+                    <div style={{ background: "#0f172a", padding: 12, borderRadius: 8, border: "1px solid #334155", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                      <span style={{ fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>Total Trades</span>
+                      <span style={{ fontSize: 16, fontWeight: 700, color: "#f1f5f9" }}>
+                        {tradingHistory?.history ? tradingHistory.history.length : 0}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Recent Trades Table */}
+                  <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "#0f172a", borderRadius: 8, border: "1px solid #334155", overflow: "hidden" }}>
+                    <div style={{ padding: "10px 12px", background: "#1e293b", borderBottom: "1px solid #334155", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <h4 style={{ fontSize: 13, fontWeight: 700, color: "#f1f5f9", margin: 0 }}>Recent Trades</h4>
+                      <span style={{ fontSize: 11, color: "#64748b", cursor: "pointer" }}>View All &gt;</span>
+                    </div>
+                    <div style={{ flex: 1, overflowY: "auto" }}>
+                      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                        <thead style={{ background: "#1e293b", position: "sticky", top: 0 }}>
+                          <tr>
+                            <th style={{ padding: "8px 12px", textAlign: "left", color: "#94a3b8", fontWeight: 600 }}>Time</th>
+                            <th style={{ padding: "8px 12px", textAlign: "center", color: "#94a3b8", fontWeight: 600 }}>Action</th>
+                            <th style={{ padding: "8px 12px", textAlign: "right", color: "#94a3b8", fontWeight: 600 }}>Price</th>
+                            <th style={{ padding: "8px 12px", textAlign: "right", color: "#94a3b8", fontWeight: 600 }}>Amount</th>
+                            <th style={{ padding: "8px 12px", textAlign: "left", color: "#94a3b8", fontWeight: 600 }}>Reason</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {tradingHistory?.history && tradingHistory.history.length > 0 ? (
+                            tradingHistory.history.slice().reverse().map((trade, idx) => (
+                              <tr key={idx} style={{ borderBottom: "1px solid #1e293b", background: idx % 2 === 0 ? "transparent" : "#162032" }}>
+                                <td style={{ padding: "8px 12px", color: "#cbd5e1" }}>{new Date(trade.time).toLocaleTimeString()}</td>
+                                <td style={{ padding: "8px 12px", textAlign: "center" }}>
+                                  <span
+                                    style={{
+                                      padding: "2px 6px",
+                                      borderRadius: 4,
+                                      fontSize: 10,
+                                      fontWeight: 700,
+                                      background: trade.action === "BUY" ? "rgba(16, 185, 129, 0.2)" : "rgba(239, 68, 68, 0.2)",
+                                      color: trade.action === "BUY" ? "#34d399" : "#f87171",
+                                    }}
+                                  >
+                                    {trade.action}
+                                  </span>
+                                </td>
+                                <td style={{ padding: "8px 12px", textAlign: "right", color: "#cbd5e1" }}>{trade.price.toLocaleString()}</td>
+                                <td style={{ padding: "8px 12px", textAlign: "right", color: "#f1f5f9" }}>{trade.amount}</td>
+                                <td style={{ padding: "8px 12px", color: "#94a3b8", fontSize: 11 }}>{trade.reason}</td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan="5" style={{ padding: "20px", textAlign: "center", color: "#64748b" }}>
+                                No trading history available.
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: 14 }}>
+                  {activeResultTab === "macd_kdj" && "MACD/KDJ Analysis Coming Soon"}
+                  {activeResultTab === "vol_price" && "Volume/Price Analysis Coming Soon"}
+                  {activeResultTab === "ai_forecast" && "AI Forecast Coming Soon"}
+                </div>
+              )}
             </div>
           </div>
         </div>
