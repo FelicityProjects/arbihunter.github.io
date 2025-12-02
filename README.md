@@ -1,70 +1,55 @@
-# Getting Started with Create React App
+# 📈 ArbiHunter: Crypto RSI & Arbitrage Dashboard
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+> **실시간 암호화폐 RSI 지표 모니터링 및 차익거래 기회 탐지 서비스** > Frontend(React)를 활용한 프로젝트이며, Azure 클라우드 환경에 배포되어 있습니다.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 🔗 Live Demo & Resources
+- **🌐 Web Service:** [서비스 바로가기 (https://felicityprojects.github.io/arbihunter.github.io)](https://felicityprojects.github.io/arbihunter.github.io)
 
-### `npm start`
+- **📑 Detailed Docs:**
+    - [📊 RSI Trading Strategy (투자 전략 로직)](./rsi_strategy.md)
+    - [☁️ Azure Deployment Setup (배포 아키텍처)](./azure_appservice_setup.md)
+    - [⚙️ CI/CD Pipeline (GitHub Actions)](./github_actions_setup.md)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🛠 Tech Stack
 
-### `npm test`
+### Frontend
+- **Framework:** React.js
+- **Visualization:** Chart.js / Recharts (사용하신 라이브러리 확인 후 기재)
+- **Deployment:** GitHub Pages
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### DevOps & Infrastructure
+- **Cloud:** Microsoft Azure (App Service)
+- **Version Control:** Git
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 💡 Key Features (핵심 기능)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 1. 실시간 RSI 기반 매매 시그널
+- 주요 거래소의 실시간 데이터를 수집하여 RSI(상대강도지수)를 계산합니다.
+- 과매수/과매도 구간 진입 시 대시보드에 즉시 알림을 표시합니다.
+- *자세한 알고리즘은 [RSI Strategy 문서](./rsi_strategy.md)를 참고하세요.*
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### 2. 거래소 간 차익거래(Arbitrage) 탐지
+- 동일 코인에 대해 거래소(A vs B) 간의 가격 차이를 실시간으로 추적합니다.
+- 프리미엄(Kimchi Premium 등) 발생 시 시각화된 데이터를 제공합니다.
 
-### `npm run eject`
+### 3. 자동화된 배포 파이프라인 (CI/CD)
+- 코드가 메인 브랜치에 푸시되면 GitHub Actions가 자동으로 빌드를 수행하고 Azure 서버에 배포합니다.
+- *배포 과정은 [Azure Setup 문서](./azure_appservice_setup.md)에 정리되어 있습니다.*
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+---
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 📂 Project Structure
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```bash
+/
+├── src/                # React Frontend Source Code
+├── etc/                # 기타 설정 파일
+├── rsi_strategy.md     # 전략 설명 문서
+├── azure_setup.md      # 인프라 구축 문서
+└── ...
